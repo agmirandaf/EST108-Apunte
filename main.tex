@@ -26,6 +26,7 @@
 \usepackage{fancyhdr}
 \usepackage{titlesec}
 \usepackage{emptypage}
+\usepackage{float}
 
 % ── COLORES Y CAJAS ───────────────────────────────────────
 \usepackage[dvipsnames]{xcolor}
@@ -382,7 +383,25 @@ S2 garantiza que $\Omega^c = \emptyset \in \mathcal{A}$.
 
 A la terna $(\Omega, \mathcal{A}, P)$ se la denomina \textbf{espacio de probabilidad}, esto es, un espacio de sucesos (espacio muestral) en el que se han definido los posibles sucesos a considerar (la $\sigma$-álgebra de sucesos) y la probabilidad de cada suceso (la función de probabilidad).
 
-De estos axiomas, podemos demostrar las siguientes propiedades:
+Una vez establecidos los tres axiomas, podemos nombrar formalmente el 
+objeto que hemos construido.
+
+\begin{definicion}{Espacio de probabilidad}{espacio_prob}
+	Un \textbf{espacio de probabilidad} es una terna 
+	$(\Omega, \mathcal{A}, P)$ donde:
+	\begin{itemize}
+		\item $\Omega$ es el espacio muestral,
+		\item $\mathcal{A}$ es una $\sigma$-álgebra sobre $\Omega$ 
+		(véase Definición~\ref{def:sigma_algebra}),
+		\item $P : \mathcal{A} \to [0,1]$ es una función de 
+		probabilidad que satisface los axiomas A1, A2 y A3.
+	\end{itemize}
+\end{definicion}
+
+El espacio de probabilidad $(\Omega, \mathcal{A}, P)$ es el objeto 
+matemático fundamental sobre el que descansa toda la teoría. Cualquier 
+noción probabilística que desarrollemos — variables aleatorias, 
+esperanza, independencia — vive dentro de este marco.
 
 \subsection{Propiedades derivadas}
 
@@ -927,69 +946,120 @@ el teorema de probabilidades totales. Esto da la forma general.
 	convierte en $P(B \mid A)\,P(A) + P(B \mid A^c)\,P(A^c) = P(B)$.
 \end{observacion}
 
-\subsubsection*{Interpretación geométrica}
+\subsubsection*{Interpretación geométrica y un ejemplo concreto}
 
-El teorema de Bayes admite una lectura geométrica muy intuitiva. 
-Mientras el teorema de probabilidades totales sumaba las piezas 
-$B \cap A_i$ para reconstruir $B$, Bayes hace lo contrario: 
-\textbf{fija su atención dentro de $B$} y pregunta qué fracción de 
-$B$ corresponde a cada franja $A_j$.
+La forma simple de Bayes tiene una lectura geométrica muy intuitiva, que 
+además revela \textit{por qué} la fórmula es válida. La clave está en que 
+la probabilidad de la intersección $P(A \cap B)$ puede calcularse de dos 
+maneras distintas, según el orden en que descompongamos:
+\[
+P(A \cap B) = P(B \mid A)\,P(A) = P(A \mid B)\,P(B)
+\]
+Igualando las dos expresiones y despejando $P(A \mid B)$ se obtiene 
+directamente el teorema de Bayes. Toda la fuerza del resultado descansa 
+en esta simple identidad.
+
+Consideremos un ejemplo concreto. Supongamos un grupo de 12 personajes, 
+cada uno de los cuales puede ser un asesino ($A$) o no ($A^c$), y puede 
+comportarse de manera sospechosa ($B$) o no ($B^c$). La siguiente tabla 
+de contingencia resume cuántos hay de cada tipo:
 
 \begin{figure}[h]
 	\centering
-	\begin{tikzpicture}[scale=1.1]
-		\draw[thick,gray] (0,0) rectangle (9,4.5);
-		\node[gray] at (0.35,4.15) {$\Omega$};
-		\fill[azul!5]  (0,0) rectangle (3,4.5);
-		\fill[rojo!5]  (3,0) rectangle (6,4.5);
-		\fill[verde!5] (6,0) rectangle (9,4.5);
-		\draw[gray,thin] (3,0) -- (3,4.5);
-		\draw[gray,thin] (6,0) -- (6,4.5);
-		\node[gray] at (1.5,0.4) {$A_1$};
-		\node[gray] at (4.5,0.4) {$A_2$};
-		\node[gray] at (7.5,0.4) {$A_3$};
-		\begin{scope}
-			\clip (0,0) rectangle (3,4.5);
-			\fill[azul!45] (4.5,2.6) ellipse (3.8 and 1.2);
-		\end{scope}
-		\begin{scope}
-			\clip (3,0) rectangle (6,4.5);
-			\fill[rojo!45] (4.5,2.6) ellipse (3.8 and 1.2);
-		\end{scope}
-		\begin{scope}
-			\clip (6,0) rectangle (9,4.5);
-			\fill[verde!45] (4.5,2.6) ellipse (3.8 and 1.2);
-		\end{scope}
-		\draw[very thick] (4.5,2.6) ellipse (3.8 and 1.2);
-		\begin{scope}
-			\clip (4.5,2.6) ellipse (3.8 and 1.2);
-			\draw[thick] (3,0) -- (3,4.5);
-			\draw[thick] (6,0) -- (6,4.5);
-		\end{scope}
-		\node[font=\small] at (1.7,2.6) {$B\cap A_1$};
-		\node[font=\small] at (4.5,2.6) {$B\cap A_2$};
-		\node[font=\small] at (7.3,2.6) {$B\cap A_3$};
-		\node[font=\small] at (4.5,4.05) {$B$};
+	\begin{tikzpicture}[scale=1.0]
+		\fill[verde!30] (0,2) rectangle (2,3);
+		\fill[Goldenrod!35] (2,2) rectangle (4,3);
+		\fill[azul!22] (0,1) rectangle (2,2);
+		\fill[gray!18] (2,1) rectangle (4,2);
+		\draw[thick] (0,0) rectangle (5,4);
+		\draw[thick] (0,1) -- (5,1);
+		\draw[thick] (0,3) -- (5,3);
+		\draw[thick] (2,0) -- (2,4);
+		\draw[thick] (4,0) -- (4,4);
+		\node[font=\small] at (1,3.5) {$B$};
+		\node[font=\small] at (3,3.5) {$B^c$};
+		\node[font=\small] at (4.5,3.5) {suma};
+		\node[font=\small] at (-0.6,2.5) {$A$};
+		\node[font=\small] at (-0.6,1.5) {$A^c$};
+		\node[font=\small] at (-0.6,0.5) {suma};
+		\node at (1,2.5) {\textbf{3}};
+		\node at (3,2.5) {\textbf{1}};
+		\node at (1,1.5) {\textbf{2}};
+		\node at (3,1.5) {\textbf{6}};
+		\node at (4.5,2.5) {4};
+		\node at (4.5,1.5) {8};
+		\node at (1,0.5) {5};
+		\node at (3,0.5) {7};
+		\node at (4.5,0.5) {12};
 	\end{tikzpicture}
-	\caption{Interpretación geométrica de Bayes: una vez que sabemos que 
-		el resultado cayó en $B$ (contorno grueso), este se convierte en el 
-		nuevo universo. La probabilidad $P(A_j \mid B)$ es la fracción de $B$ 
-		ocupada por $B \cap A_j$.}
-	\label{fig:bayes}
+	\caption{Tabla de contingencia: hay 3 asesinos sospechosos, 1 asesino no 
+		sospechoso, 2 no asesinos sospechosos y 6 no asesinos no sospechosos.}
+	\label{fig:contingencia}
 \end{figure}
 
-En la figura \ref{fig:bayes}, el espacio $\Omega$ y las franjas $A_i$ 
-quedan en segundo plano: una vez condicionados en $B$, lo único 
-relevante es el interior de la elipse. Geométricamente:
+De la tabla leemos directamente:
 \[
-P(A_j \mid B) = \frac{\text{área de } B \cap A_j}
-{\text{área total de } B}
+P(A) = \tfrac{4}{12}, \quad P(B) = \tfrac{5}{12}, \quad 
+P(B \mid A) = \tfrac{3}{4}, \quad P(A \mid B) = \tfrac{3}{5}, \quad 
+P(A \cap B) = \tfrac{3}{12}
 \]
-Esto explica por qué $P(A_j \mid B)$ puede diferir tanto de $P(A_j)$: 
-la primera mide la proporción de $A_j$ \textit{dentro de $B$}, mientras 
-que la segunda la mide dentro de todo $\Omega$. Si $B$ se concentra 
-desproporcionadamente en una franja, condicionar en $B$ redistribuye 
-el peso hacia esa franja.
+
+Ahora bien, la identidad geométrica se aprecia en la 
+figura~\ref{fig:areas}: el área del rectángulo $A \cap B$ es la misma sin 
+importar cómo la construyamos. A la izquierda la obtenemos tomando 
+primero la fracción $P(A)$ y luego, dentro de ella, la fracción 
+$P(B \mid A)$. A la derecha tomamos primero $P(B)$ y luego $P(A \mid B)$. 
+Ambos caminos llegan al mismo rectángulo.
+
+\begin{figure}[h]
+	\centering
+	\begin{tikzpicture}[scale=1.0]
+		\begin{scope}[shift={(0,0)}]
+			\draw[thick] (0,0) rectangle (4,4);
+			\node[font=\small] at (2,4.4) {Primero $A$, luego $B\mid A$};
+			\fill[Goldenrod!25] (0,0) rectangle (1.333,4);
+			\fill[verde!35] (0,1) rectangle (1.333,4);
+			\draw[thick] (1.333,0) -- (1.333,4);
+			\draw[thick] (0,1) -- (1.333,1);
+			\node[font=\scriptsize,rotate=90] at (-0.3,2) {$P(A)=\tfrac{4}{12}$};
+			\node[font=\scriptsize] at (0.67,2.5) {$A\cap B$};
+			\node[font=\scriptsize] at (2.6,3.5) {$P(B\mid A)=\tfrac{3}{4}$};
+		\end{scope}
+		\begin{scope}[shift={(6,0)}]
+			\draw[thick] (0,0) rectangle (4,4);
+			\node[font=\small] at (2,4.4) {Primero $B$, luego $A\mid B$};
+			\fill[azul!18] (0,0) rectangle (1.667,4);
+			\fill[verde!35] (0,1.6) rectangle (1.667,4);
+			\draw[thick] (1.667,0) -- (1.667,4);
+			\draw[thick] (0,1.6) -- (1.667,1.6);
+			\node[font=\scriptsize,rotate=90] at (-0.3,2) {$P(B)=\tfrac{5}{12}$};
+			\node[font=\scriptsize] at (0.83,2.8) {$A\cap B$};
+			\node[font=\scriptsize] at (2.9,3.5) {$P(A\mid B)=\tfrac{3}{5}$};
+		\end{scope}
+		\node at (5,2) {$=$};
+	\end{tikzpicture}
+	\caption{El área de $A \cap B$ se construye de dos formas: 
+		$P(A)\,P(B\mid A)$ (izquierda) y $P(B)\,P(A\mid B)$ (derecha). Como ambas 
+		dan la misma área, igualarlas produce el teorema de Bayes.}
+	\label{fig:areas}
+\end{figure}
+
+Verifiquémoslo numéricamente. Por la izquierda:
+\[
+P(B \mid A)\,P(A) = \tfrac{3}{4} \cdot \tfrac{4}{12} = \tfrac{3}{12}
+\]
+Por la derecha:
+\[
+P(A \mid B)\,P(B) = \tfrac{3}{5} \cdot \tfrac{5}{12} = \tfrac{3}{12}
+\]
+Ambas coinciden, como debía ser. Y despejando $P(A \mid B)$ de la 
+igualdad recuperamos Bayes:
+\[
+P(A \mid B) = \frac{P(B \mid A)\,P(A)}{P(B)} = 
+\frac{\tfrac{3}{4} \cdot \tfrac{4}{12}}{\tfrac{5}{12}} = 
+\frac{3}{5}
+\]
+que es exactamente el valor que habíamos leído directamente de la tabla.
 
 \begin{observacion}
 	El teorema de Bayes es la herramienta formal que permite 
@@ -1003,10 +1073,10 @@ el peso hacia esa franja.
 
 El teorema de Bayes nació de una pregunta filosófica, no técnica. En su 
 \textit{Investigación sobre el entendimiento humano}, Hume había 
-planteado que la inducción carece de justificación lógica: por más 
+planteado que la inducción carece de justificación lógica (que consiste en observar patrones o casos específicos en el mundo real para llegar a una conclusión general): por más 
 veces que hayamos observado que el sol sale cada mañana, ninguna 
 cantidad de observaciones pasadas garantiza lógicamente que saldrá 
-mañana. Si esto es así, el conocimiento empírico —incluida toda la 
+mañana. Los fundamentos de esto se deben a la visión empirista radical de este filósofo, pues para Hume la única fuente del conocimiento debe ser la experiencia sensible. Si esto es así, el conocimiento empírico —incluida toda la 
 ciencia newtoniana— descansaría sobre una base irracional.
 
 Thomas Bayes, ministro presbiteriano inglés y contemporáneo de Hume, 
@@ -1031,19 +1101,885 @@ puedo inferir sobre lo que no veo?
 % ==========================================================
 \chapter{Variable aleatoria discreta}
 
-\section{\textquestiondown Qu\'{e} es una variable aleatoria?}
+\section{¿Qué es una variable aleatoria?}
 
-\section{Variable aleatoria discreta}
+Hasta ahora hemos trabajado con eventos — subconjuntos abstractos del 
+espacio muestral $\Omega$. Sin embargo, en la práctica queremos asociar 
+\textit{números} a los resultados de un experimento aleatorio: el número 
+de clientes que llegan en una hora, el monto de una transacción, la 
+cantidad de fallas en un proceso. Para eso necesitamos una función que 
+traduzca los elementos de $\Omega$ a la recta numérica. Ese objeto es 
+la \textbf{variable aleatoria}.
 
-\section{Funci\'{o}n de distribuci\'{o}n de probabilidad}
+\begin{definicion}{Variable aleatoria}{va}
+	Sea $(\Omega, \mathcal{A}, P)$ un espacio de probabilidad. Una 
+	\textbf{variable aleatoria} es una función:
+	\[
+	X : \Omega \longrightarrow \mathbb{R}
+	\]
+	que satisface la condición de \textbf{medibilidad}: para todo 
+	$x \in \mathbb{R}$,
+	\[
+	\{\omega \in \Omega : X(\omega) \leq x\} \in \mathcal{A}
+	\]
+	Es decir, el conjunto de resultados para los cuales $X$ no supera 
+	el valor $x$ siempre es un evento — pertenece a la $\sigma$-álgebra 
+	$\mathcal{A}$.
+\end{definicion}
+
+\begin{observacion}
+	La condición de medibilidad exige que 
+	$\{\omega \in \Omega : X(\omega) \leq x\} \in \mathcal{A}$ para 
+	todo $x \in \mathbb{R}$. Esto garantiza que siempre tenga sentido 
+	calcular $P(X \leq x)$ — si ese conjunto no perteneciera a 
+	$\mathcal{A}$, la función $P$ no estaría definida sobre él. En 
+	espacios finitos o contables, toda función $X: \Omega \to \mathbb{R}$ 
+	es automáticamente medible, por lo que la condición solo cobra 
+	relevancia técnica en espacios continuos.
+\end{observacion}
+
+\begin{observacion}
+	Usaremos letras mayúsculas ($X$, $Y$, $Z$) para denotar variables 
+	aleatorias y letras minúsculas ($x$, $y$, $z$) para los valores 
+	concretos que estas pueden tomar. La notación $P(X = x)$ significa 
+	la probabilidad del evento $\{\omega \in \Omega : X(\omega) = x\}$.
+\end{observacion}
+
+\subsection*{Ejemplo: suma de dos dados}
+
+Lanzamos dos dados equilibrados. El espacio muestral es:
+\[
+\Omega = \{(i,j) : i,j \in \{1,2,3,4,5,6\}\}, \quad \#\Omega = 36
+\]
+Definimos la variable aleatoria $X$ como la \textit{suma} de los 
+valores obtenidos:
+\[
+X(i,j) = i + j
+\]
+Por ejemplo, $X(1,2) = 3$, $X(3,3) = 6$ y $X(6,6) = 12$. La figura 
+\ref{fig:va_funcion} ilustra cómo $X$ mapea elementos de $\Omega$ a 
+valores en $\mathbb{R}$.
+
+\begin{figure}[h]
+	\centering
+	\begin{tikzpicture}[scale=1.1]
+		\draw[thick,rounded corners=8pt] (-2.5,-1.8) rectangle (2.5,1.8);
+		\node at (-2.1,1.5) {$\Omega$};
+		\foreach \x/\y/\lab in {
+			-1.5/1.1/{(1,1)},
+			0.2/1.2/{(1,2)},
+			1.7/0.9/{(2,1)},
+			-1.8/0.1/{(2,3)},
+			0.0/0.2/{(3,3)},
+			1.6/0.1/{(4,2)},
+			-1.5/-0.9/{(5,6)},
+			0.1/-0.8/{(6,5)},
+			1.7/-1.0/{(6,6)}
+		}{
+			\node[font=\scriptsize] at (\x,\y) {\lab};
+		}
+		\draw[->,thick,azul] (2.7,0) -- (4.3,0);
+		\node[font=\small,azul] at (3.5,0.35) {$X$};
+		\draw[thick] (4.5,-1.8) -- (4.5,1.8);
+		\node at (4.5,2.1) {$\mathbb{R}$};
+		\foreach \y/\lab in {
+			1.4/2, 0.9/3, 0.2/6, -0.4/9, -1.0/11, -1.6/12
+		}{
+			\fill[rojo!70] (4.5,\y) circle (2pt);
+			\node[font=\scriptsize,right] at (4.6,\y) {\lab};
+		}
+		\draw[->,gray,thin] (0.6,1.2)  to[out=10,in=150] (4.4,0.9);
+		\draw[->,gray,thin] (2.0,0.9)  to[out=10,in=150] (4.4,0.9);
+		\draw[->,gray,thin] (0.3,0.2)  to[out=10,in=170] (4.4,0.2);
+		\draw[->,gray,thin] (2.0,0.1)  to[out=10,in=170] (4.4,0.2);
+		\draw[->,gray,thin] (2.0,-1.0) to[out=10,in=190] (4.4,-1.6);
+	\end{tikzpicture}
+	\caption{La variable aleatoria $X$ como función $\Omega \to \mathbb{R}$.
+		Distintos elementos de $\Omega$ pueden mapearse al mismo valor real
+		(por ejemplo, $(1,2)$ y $(2,1)$ ambos mapean a $X = 3$).}
+	\label{fig:va_funcion}
+\end{figure}
+
+Nótese un hecho importante: varios elementos de $\Omega$ mapean al 
+mismo valor de $X$. Los pares $(1,2)$ y $(2,1)$ producen ambos $X=3$; 
+los pares $(1,5)$, $(2,4)$, $(3,3)$, $(4,2)$ y $(5,1)$ producen todos 
+$X=6$. Esto es lo esperable — la variable aleatoria \textit{resume} 
+información del resultado, colapsando múltiples resultados en un mismo 
+número.
+
+\section{Clasificación de las variables aleatorias}
+
+\begin{definicion}{Variable aleatoria discreta}{va_discreta}
+	Una variable aleatoria $X$ es \textbf{discreta} si su recorrido 
+	$\text{Rec}(X) = \{x \in \mathbb{R} : P(X = x) > 0\}$ es finito o 
+	contable. Es decir, sus valores posibles pueden listarse como una 
+	sucesión $x_1, x_2, x_3, \ldots$
+\end{definicion}
+
+\begin{definicion}{Variable aleatoria continua}{va_continua}
+	Una variable aleatoria $X$ es \textbf{continua} si su recorrido 
+	abarca un intervalo (o unión de intervalos) de la recta numérica. 
+	En este caso, $P(X = x) = 0$ para todo valor particular $x$, y la 
+	probabilidad solo tiene sentido sobre intervalos.
+\end{definicion}
+
+\begin{observacion}
+	La distinción entre discreta y continua no es solo técnica — 
+	implica herramientas matemáticas distintas. Para variables discretas 
+	usaremos sumas; para variables continuas, integrales. En este 
+	capítulo nos concentramos en el caso discreto. El caso continuo se 
+	trata en el Tema~3.
+\end{observacion}
+
+En el ejemplo de los dos dados, $X = i+j$ toma valores en 
+$\{2, 3, 4, \ldots, 12\}$ — un conjunto finito — por lo que es una 
+variable aleatoria \textbf{discreta}. En cambio, el tiempo de espera 
+hasta que llega el próximo cliente puede tomar cualquier valor en 
+$[0, +\infty)$, por lo que sería \textbf{continua}.
+
+
+\section{Funci\'{o}n de masa de probabilidad}
+
+Una vez definida una variable aleatoria discreta $X$, la pregunta 
+natural es: ¿cómo se distribuye la probabilidad sobre sus valores 
+posibles? La función de masa de probabilidad responde 
+exactamente eso — asigna a cada valor posible de $X$ la probabilidad 
+de que $X$ tome ese valor.
+
+\begin{definicion}{Función de masa de probabilidad}{fmp}
+	Sea $X$ una variable aleatoria discreta con recorrido 
+	$\text{Rec}(X)$. La \textbf{función de masa de probabilidad} 
+	 de $X$ es 
+	la función $p_X : \mathbb{R} \to [0,1]$ definida por:
+	\[
+	p_X(x) = P(X = x) = P(\{\omega \in \Omega : X(\omega) = x\})
+	\]
+	para todo $x \in \mathbb{R}$, donde $p_X(x) = 0$ para todo 
+	$x \notin \text{Rec}(X)$.
+\end{definicion}
+
+El nombre \textbf{función de masa} no es arbitrario — proviene de la 
+mecánica clásica. Si imaginamos los valores del recorrido $x \in 
+\text{Rec}(X)$ como posiciones sobre una recta, y las probabilidades 
+$p_X(x)$ como \textbf{masas puntuales} concentradas en esas posiciones, 
+entonces la distribución de probabilidad discreta es formalmente 
+idéntica a un sistema físico de partículas. Esta analogía no es solo 
+pedagógica — es una identidad matemática exacta que veremos reflejada 
+en las definiciones de valor esperado y varianza.
+
+\begin{observacion}
+	\textbf{Sobre la terminología.} En el curso, y en muchos textos 
+	de estadística aplicada, esta función se denomina 
+	\textit{función de distribución de probabilidad}. Esta terminología 
+	es técnicamente imprecisa: el término \textit{distribución} está 
+	reservado más apropiadamente para la función de distribución 
+	\textit{acumulada} $F_X(x) = P(X \leq x)$, que veremos en la 
+	sección siguiente. La denominación correcta para $p_X(x) = P(X=x)$ 
+	es \textbf{función de masa de probabilidad}, que es la que usaremos 
+	en este apunte. La distinción se vuelve especialmente importante en 
+	el Tema~3, cuando introduzcamos la \textbf{función de densidad de 
+		probabilidad} para variables continuas — un objeto distinto que 
+	también suele llamarse coloquialmente "función de distribución", 
+	generando confusión.
+\end{observacion}
+
+\begin{observacion}
+	\textbf{Sobre la notación.} En este apunte usamos $p_X(x)$ para 
+	la función de masa de probabilidad, distinguiéndola de $P$ — la 
+	función de probabilidad sobre eventos definida en los axiomas de 
+	Kolmogórov (Definición~\ref{def:espacio_prob}). La distinción es:
+	
+	\medskip
+	\begin{center}
+		\begin{tabular}{@{}lll@{}}
+			$P(A)$ & probabilidad de un evento $A \in \mathcal{A}$ & 
+			(Kolmogórov) \\[4pt]
+			$p_X(x)$ & probabilidad de que $X$ tome el valor $x$ & 
+			(función de masa) \\
+		\end{tabular}
+	\end{center}
+	
+	\medskip
+	La relación entre ambas es: $p_X(x) = P(\{\omega : X(\omega) = x\})$
+	— la función de masa es simplemente $P$ aplicada al evento 
+	$\{X = x\}$.
+	
+	\medskip
+	En el curso y en muchos textos aplicados esta función también 
+	aparece denotada $P(x)$, $p(x)$ o $f(x)$. Todas son la misma 
+	cosa. Usaremos $p_X(x)$ por claridad, pero reconoceremos cualquiera 
+	de estas notaciones en evaluaciones.
+\end{observacion}
+
+\subsection{Propiedades}
+
+La función de masa de probabilidad satisface dos propiedades que se 
+deducen directamente de los axiomas de Kolmogórov.
+
+\begin{proposicion}{Propiedades de la función de masa}{props_fmp}
+	Sea $p_X$ la función de masa de probabilidad de una variable 
+	aleatoria discreta $X$. Entonces:
+	
+	\medskip
+	\noindent\textbf{P1)} $0 \leq p_X(x) \leq 1$ para todo 
+	$x \in \mathbb{R}$.
+	
+	\medskip
+	\noindent\textbf{P2)} $\displaystyle\sum_{x \in \text{Rec}(X)} 
+	p_X(x) = 1$.
+\end{proposicion}
+
+\begin{proof}
+	\textbf{P1)} Por definición $p_X(x) = P(\{X = x\})$. Como $P$ 
+	satisface A1:
+	\[
+	P(\{X = x\}) \geq 0
+	\]
+	Como $\{X = x\} \subseteq \Omega$ y $P(\Omega) = 1$, por la 
+	Proposición~\ref{prop:monotonia}:
+	\[
+	P(\{X = x\}) \leq P(\Omega) = 1
+	\]
+	Luego $0 \leq p_X(x) \leq 1$. \hfill$\square$
+	
+	\medskip
+	\textbf{P2)} Los eventos $\{X = x\}$ para $x \in \text{Rec}(X)$ 
+	son mutuamente excluyentes y exhaustivos, luego forman una 
+	partición de $\Omega$. Aplicando A3:
+	\[
+	\sum_{x \in \text{Rec}(X)} p_X(x) 
+	= \sum_{x \in \text{Rec}(X)} P(X = x)
+	= P\!\left(\bigcup_{x \in \text{Rec}(X)} \{X = x\}\right)
+	= P(\Omega) = 1 \qedhere
+	\]
+\end{proof}
+
+\begin{observacion}
+	Estas dos propiedades también caracterizan completamente a las 
+	funciones de masa: cualquier función $p: \mathbb{R} \to [0,1]$ que 
+	satisfaga P1 y P2 es la función de masa de alguna variable 
+	aleatoria discreta. Son el análogo discreto de los axiomas de 
+	Kolmogórov para la función de probabilidad sobre eventos.
+\end{observacion}
 
 \section{Funci\'{o}n de distribuci\'{o}n acumulada}
+
+
+La función de masa $p_X(x)$ responde preguntas del tipo $P(X = x)$ — 
+la probabilidad de un valor exacto. Sin embargo, en la práctica casi 
+siempre nos interesan preguntas sobre intervalos: ¿cuál es la 
+probabilidad de que $X$ no supere cierto umbral? ¿De que caiga entre 
+dos valores? La función de distribución acumulada es la herramienta 
+que responde esas preguntas de manera eficiente.
+
+\begin{definicion}{Función de distribución acumulada}{fda}
+	Sea $X$ una variable aleatoria discreta con función de masa 
+	$p_X$. La \textbf{función de distribución acumulada} (FDA) de 
+	$X$ es la función $F_X : \mathbb{R} \to [0,1]$ definida por:
+	\[
+	F_X(x) = P(X \leq x) = \sum_{t \leq x} p_X(t) 
+	\qquad \text{para todo } x \in \mathbb{R}
+	\]
+	donde la suma recorre todos los valores $t \in \text{Rec}(X)$ 
+	con $t \leq x$.
+\end{definicion}
+
+\subsection{Propiedades}
+
+\begin{proposicion}{Propiedades de la FDA}{props_fda}
+	Sea $F_X$ la función de distribución acumulada de una variable 
+	aleatoria discreta $X$. Entonces:
+	
+	\medskip
+	\noindent\textbf{P1)} $F_X$ es \textbf{no decreciente}: si 
+	$a \leq b$ entonces $F_X(a) \leq F_X(b)$.
+	
+	\medskip
+	\noindent\textbf{P2)} $F_X$ tiene \textbf{límites en el infinito}:
+	\[
+	\lim_{x \to -\infty} F_X(x) = 0 \qquad \text{y} \qquad 
+	\lim_{x \to +\infty} F_X(x) = 1
+	\]
+	
+	\medskip
+	\noindent\textbf{P3)} $F_X$ es \textbf{continua por la derecha}: 
+	para todo $x \in \mathbb{R}$,
+	\[
+	\lim_{t \to x^+} F_X(t) = F_X(x)
+	\]
+\end{proposicion}
+
+\begin{proof}
+	\textbf{P1)} Si $a \leq b$, entonces el conjunto 
+	$\{t \in \text{Rec}(X) : t \leq a\} \subseteq 
+	\{t \in \text{Rec}(X) : t \leq b\}$. Como $p_X(t) \geq 0$ 
+	para todo $t$, sumar sobre un conjunto más grande no puede 
+	disminuir el resultado:
+	\[
+	F_X(a) = \sum_{t \leq a} p_X(t) \leq \sum_{t \leq b} 
+	p_X(t) = F_X(b) \qquad \square
+	\]
+	
+	\medskip
+	\textbf{P2)} Cuando $x \to -\infty$, no hay valores de 
+	$\text{Rec}(X)$ que satisfagan $t \leq x$, luego la suma es 
+	vacía y vale $0$. Cuando $x \to +\infty$, todos los valores de 
+	$\text{Rec}(X)$ satisfacen $t \leq x$, luego por P2 de la 
+	Proposición~\ref{prop:props_fmp}:
+	\[
+	\lim_{x \to +\infty} F_X(x) = \sum_{t \in \text{Rec}(X)} 
+	p_X(t) = 1 \qquad \square
+	\]
+	
+	\medskip
+	\textbf{P3)} Para $t$ suficientemente cerca de $x$ por la 
+	derecha, no hay valores de $\text{Rec}(X)$ en el intervalo 
+	$(x, t]$ — el recorrido es discreto, luego existe un salto 
+	mínimo entre valores consecutivos. Por tanto $F_X(t) = F_X(x)$ 
+	para $t$ suficientemente próximo a $x$ por la derecha, lo que 
+	prueba la continuidad por la derecha. $\qedhere$
+\end{proof}
+
+\begin{observacion}
+	La propiedad P3 explica la convención de los puntos 
+	\textbf{cerrados} y \textbf{abiertos} en la gráfica de la FDA: 
+	en cada salto, el punto cerrado (valor que toma $F_X$) está 
+	siempre a la derecha, reflejando que $F_X$ incluye el valor 
+	$x$ mismo en la suma — es decir, $P(X \leq x)$ y no 
+	$P(X < x)$.
+\end{observacion}
+
+\subsection{Cálculo de probabilidades con la FDA}
+
+La utilidad principal de la FDA es que permite calcular 
+probabilidades sobre intervalos con una simple resta, sin necesidad 
+de sumar término a término.
+
+\begin{proposicion}{Probabilidades de intervalos}{intervalos_fda}
+	Sea $F_X$ la FDA de una variable aleatoria discreta $X$. 
+	Para cualquier $a < b$:
+	\[
+	P(a < X \leq b) = F_X(b) - F_X(a)
+	\]
+\end{proposicion}
+
+\begin{proof}
+	Los eventos $\{X \leq a\}$ y $\{a < X \leq b\}$ son mutuamente 
+	excluyentes y su unión es $\{X \leq b\}$. Por A3:
+	\[
+	P(X \leq b) = P(X \leq a) + P(a < X \leq b)
+	\]
+	Despejando:
+	\[
+	P(a < X \leq b) = P(X \leq b) - P(X \leq a) = 
+	F_X(b) - F_X(a) \qedhere
+	\]
+\end{proof}
+
+\begin{observacion}
+	Nótese que el intervalo es abierto en $a$ y cerrado en $b$: 
+	$P(a < X \leq b)$ excluye $a$ e incluye $b$. Esto es 
+	consecuencia directa de la continuidad por la derecha de $F_X$. 
+	Para otros tipos de intervalos:
+	\medskip
+	\begin{center}
+		\begin{tabular}{@{}ll@{}}
+			$P(X > a)$       & $= 1 - F_X(a)$ \\[4pt]
+			$P(X \geq a)$    & $= 1 - F_X(a) + p_X(a) = 
+			1 - F_X(a^-)$ \\[4pt]
+			$P(a \leq X \leq b)$ & $= F_X(b) - F_X(a) + p_X(a)$ \\
+		\end{tabular}
+	\end{center}
+\end{observacion}
+
+\subsection*{Ejemplo: demanda diaria de un tractor}
+
+Una empresa arrienda su tractor para trabajos de remoción. La demanda 
+diaria $X$ — el número de veces que se usa el tractor en un día — 
+tiene la siguiente distribución de probabilidad, donde $P(5)$ se 
+deduce de la propiedad P2 de la función de masa: la suma de todas 
+las probabilidades debe ser $1$, luego 
+$p_X(5) = 1 - 0.10 - 0.20 - 0.30 - 0.25 - 0.10 = 0.05$.
+
+\medskip
+\begin{center}
+	\begin{tabular}{@{}ccc@{}}
+		\toprule
+		$x$ & $p_X(x)$ & $F_X(x)$ \\
+		\midrule
+		0 & 0.10 & 0.10 \\
+		1 & 0.20 & 0.30 \\
+		2 & 0.30 & 0.60 \\
+		3 & 0.25 & 0.85 \\
+		4 & 0.10 & 0.95 \\
+		5 & 0.05 & 1.00 \\
+		\bottomrule
+	\end{tabular}
+\end{center}
+\medskip
+
+La figura \ref{fig:fda} muestra la FDA como función escalera. Cada 
+salto ocurre en un valor de $\text{Rec}(X)$ y su altura es 
+exactamente $p_X(x)$.
+
+\begin{figure}[H]
+	\centering
+	\begin{tikzpicture}
+		\begin{axis}[
+			width=11cm, height=7cm,
+			xmin=-0.5, xmax=6.5,
+			ymin=-0.05, ymax=1.15,
+			xlabel={$x$},
+			ylabel={$F_X(x)$},
+			axis lines=left,
+			xtick={0,1,2,3,4,5},
+			ytick={0,0.10,0.30,0.60,0.85,0.95,1.00},
+			yticklabels={$0$,$0.10$,$0.30$,$0.60$,$0.85$,$0.95$,$1.00$},
+			grid=both,
+			grid style={line width=0.2pt, draw=gray!30},
+			tick label style={font=\small},
+			label style={font=\small},
+			]
+			\addplot[thick,azul] coordinates {(-0.5,0) (0,0)};
+			\addplot[thick,azul] coordinates {(0,0.10) (1,0.10)};
+			\addplot[thick,azul] coordinates {(1,0.30) (2,0.30)};
+			\addplot[thick,azul] coordinates {(2,0.60) (3,0.60)};
+			\addplot[thick,azul] coordinates {(3,0.85) (4,0.85)};
+			\addplot[thick,azul] coordinates {(4,0.95) (5,0.95)};
+			\addplot[thick,azul] coordinates {(5,1.00) (6.5,1.00)};
+			\addplot[only marks, mark=*, mark size=2.5pt, azul]
+			coordinates {(0,0.10)(1,0.30)(2,0.60)(3,0.85)(4,0.95)(5,1.00)};
+			\addplot[only marks, mark=o, mark size=2.5pt, azul,
+			every mark/.append style={fill=white}]
+			coordinates {(0,0)(1,0.10)(2,0.30)(3,0.60)(4,0.85)(5,0.95)};
+			\node[font=\scriptsize,rojo] at (axis cs:0.5,0.05) {$+0.10$};
+			\node[font=\scriptsize,rojo] at (axis cs:1.5,0.20) {$+0.20$};
+			\node[font=\scriptsize,rojo] at (axis cs:2.5,0.45) {$+0.30$};
+			\node[font=\scriptsize,rojo] at (axis cs:3.5,0.73) {$+0.25$};
+			\node[font=\scriptsize,rojo] at (axis cs:4.5,0.90) {$+0.10$};
+		\end{axis}
+	\end{tikzpicture}
+	\caption{Función de distribución acumulada $F_X$ para el ejemplo del 
+		tractor. Los puntos cerrados indican continuidad por la derecha. 
+		Los saltos en rojo corresponden a $p_X(x)$.}
+	\label{fig:fda}
+\end{figure}
+
+Usando la proposición de intervalos:
+\[
+P(X > 3) = 1 - F_X(3) = 1 - 0.85 = 0.15
+\]
+\[
+P(1 < X \leq 4) = F_X(4) - F_X(1) = 0.95 - 0.30 = 0.65
+\]
 
 \section{Valor esperado y varianza}
 
 \subsection{Valor esperado}
 
+Sabemos que una variable aleatoria discreta $X$ puede tomar distintos 
+valores con distintas probabilidades. Una pregunta natural es: ¿cuál 
+es el valor \textit{típico} o \textit{central} de $X$? La respuesta 
+es el \textbf{valor esperado} — un promedio ponderado de los valores 
+posibles de $X$, donde cada valor se pondera por su probabilidad.
+
+\begin{definicion}{Valor esperado}{ev}
+	Sea $X$ una variable aleatoria discreta con función de masa 
+	$p_X$ y recorrido $\text{Rec}(X)$. El \textbf{valor esperado}, 
+	\textbf{valor medio} o \textbf{esperanza} de $X$, denotado 
+	$E(X)$, $\mu_X$ o $\mu$, es:
+	\[
+	E(X) = \sum_{x \in \text{Rec}(X)} x \cdot p_X(x)
+	\]
+\end{definicion}
+
+La definición del valor esperado no es arbitraria — tiene un origen 
+físico preciso. En mecánica clásica, el \textbf{centro de masa} de un 
+sistema de partículas con masas $m_i$ en posiciones $x_i$ es:
+\[
+\bar{x} = \frac{\sum_i m_i x_i}{\sum_i m_i}
+\]
+Si normalizamos las masas para que sumen $1$ — definiendo $p_i = 
+m_i / \sum_j m_j$ — obtenemos exactamente:
+\[
+\bar{x} = \sum_i x_i\, p_i = E(X)
+\]
+El valor esperado es el punto donde la distribución estaría en 
+equilibrio si la colocáramos sobre un fulcro. La figura 
+\ref{fig:fisica_ev} muestra este paralelismo explícitamente.
+
+\begin{figure}[H]
+	\centering
+	\begin{tikzpicture}[scale=1.0]
+		\begin{scope}[shift={(0,0)}]
+			\node[font=\small\bfseries] at (3,4.2) {Sistema físico};
+			\draw[thick] (0,0) -- (6,0);
+			\fill[azul!60] (1,0) circle (8pt);
+			\node[font=\scriptsize,white] at (1,0) {$m_1$};
+			\node[font=\scriptsize,below] at (1,-0.4) {$x_1$};
+			\fill[azul!60] (2.4,0) circle (11pt);
+			\node[font=\scriptsize,white] at (2.4,0) {$m_2$};
+			\node[font=\scriptsize,below] at (2.4,-0.4) {$x_2$};
+			\fill[azul!60] (3.8,0) circle (13pt);
+			\node[font=\scriptsize,white] at (3.8,0) {$m_3$};
+			\node[font=\scriptsize,below] at (3.8,-0.4) {$x_3$};
+			\fill[azul!60] (5.2,0) circle (6pt);
+			\node[font=\scriptsize,white] at (5.2,0) {$m_4$};
+			\node[font=\scriptsize,below] at (5.2,-0.4) {$x_4$};
+			\draw[rojo,very thick,dashed] (3.1,0) -- (3.1,1.2);
+			\node[rojo,font=\small] at (3.1,1.5) 
+			{$\bar{x} = \dfrac{\sum m_i x_i}{\sum m_i}$};
+			\fill[rojo!70] (3.1,-0.15) -- (2.7,-0.7) -- (3.5,-0.7) -- cycle;
+			\draw[thick] (2.5,-0.7) -- (3.7,-0.7);
+			\node[font=\scriptsize,rojo] at (3.1,-1.0) {centro de masa};
+		\end{scope}
+		\node[font=\Large] at (7,0) {$\equiv$};
+		\begin{scope}[shift={(7.5,0)}]
+			\node[font=\small\bfseries] at (3,4.2) {Modelo probabilístico};
+			\draw[thick] (0,0) -- (6,0);
+			\foreach \x/\h/\lab in {1/1.2/0.20, 2.4/1.8/0.30, 3.8/2.1/0.35, 
+				5.2/0.9/0.15}{
+				\fill[azul!30] (\x-0.25,0) rectangle (\x+0.25,\h);
+				\draw[azul,thick] (\x-0.25,0) rectangle (\x+0.25,\h);
+				\node[font=\scriptsize,azul] at (\x,\h+0.2) {$\lab$};
+			}
+			\foreach \x/\lab in {1/$x_1$, 2.4/$x_2$, 3.8/$x_3$, 5.2/$x_4$}{
+				\node[font=\scriptsize,below] at (\x,-0.4) {\lab};
+			}
+			\draw[rojo,very thick,dashed] (3.1,0) -- (3.1,3.0);
+			\node[rojo,font=\small] at (3.1,3.4) {$E(X) = \sum x\, p_X(x)$};
+			\fill[rojo!70] (3.1,-0.15) -- (2.7,-0.7) -- (3.5,-0.7) -- cycle;
+			\draw[thick] (2.5,-0.7) -- (3.7,-0.7);
+			\node[font=\scriptsize,rojo] at (3.1,-1.0) {valor esperado};
+		\end{scope}
+	\end{tikzpicture}
+	\caption{El valor esperado como centro de masa. Las masas físicas 
+		$m_i$ normalizadas corresponden a las probabilidades $p_X(x_i)$; 
+		el punto de equilibrio físico corresponde a $E(X)$.}
+	\label{fig:fisica_ev}
+\end{figure}
+
+\begin{proposicion}{Valor esperado de una función de $X$}{ev_hx}
+	Sea $h : \mathbb{R} \to \mathbb{R}$ una función. El valor 
+	esperado de $h(X)$ es:
+	\[
+	E(h(X)) = \sum_{x \in \text{Rec}(X)} h(x) \cdot p_X(x)
+	\]
+\end{proposicion}
+
+\begin{proposicion}{Linealidad del valor esperado}{ev_lineal}
+	Si $a$ y $b$ son constantes, entonces:
+	\[
+	E(aX + b) = aE(X) + b
+	\]
+\end{proposicion}
+
+\begin{proof}
+	Aplicamos la Proposición~\ref{prop:ev_hx} con $h(x) = ax + b$:
+	\[
+	E(aX + b) 
+	= \sum_{x \in \text{Rec}(X)} (ax + b)\, p_X(x)
+	= a \sum_{x \in \text{Rec}(X)} x\, p_X(x) 
+	+ b \sum_{x \in \text{Rec}(X)} p_X(x)
+	= aE(X) + b \qedhere
+	\]
+	donde en el último paso usamos la definición de $E(X)$ y la 
+	propiedad P2 de la función de masa 
+	($\sum p_X(x) = 1$).
+\end{proof}
+
+\subsection*{Ejemplo: demanda mensual}
+
+Una empresa registra la demanda mensual $X$ de un producto durante 
+dos años y obtiene la siguiente distribución:
+
+\medskip
+\begin{center}
+	\begin{tabular}{@{}ccccc@{}}
+		\toprule
+		$x$ & 300 & 400 & 500 & 600 \\
+		\midrule
+		$p_X(x)$ & 0.20 & 0.30 & 0.35 & 0.15 \\
+		\bottomrule
+	\end{tabular}
+\end{center}
+\medskip
+
+El valor esperado es:
+\[
+E(X) = 300(0.20) + 400(0.30) + 500(0.35) + 600(0.15)
+= 60 + 120 + 175 + 90 = 445
+\]
+
+La figura~\ref{fig:ev} muestra la función de masa con el valor 
+esperado marcado como centro de la distribución.
+
+\begin{figure}[H]
+	\centering
+	\begin{tikzpicture}
+		\begin{axis}[
+			width=11cm, height=6cm,
+			xmin=250, xmax=650,
+			ymin=0, ymax=0.60,
+			xlabel={$x$},
+			ylabel={$p_X(x)$},
+			axis lines=left,
+			xtick={300,400,445,500,600},
+			xticklabels={$300$,$400$,$\mu$,$500$,$600$},
+			ytick={0.10,0.20,0.30,0.35},
+			yticklabels={$0.10$,$0.20$,$0.30$,$0.35$},
+			tick label style={font=\small},
+			label style={font=\small},
+			bar width=18pt,
+			]
+			\addplot[ybar, fill=azul!30, draw=azul]
+			coordinates {(300,0.20)(400,0.30)(500,0.35)(600,0.15)};
+			\addplot[thick, rojo, dashed] coordinates {(445,0) (445,0.48)};
+			\node[font=\small, rojo, above right] at (axis cs:445,0.48) {$E(X)=445$};
+		\end{axis}
+	\end{tikzpicture}
+	\caption{Función de masa $p_X$ para la demanda mensual. La línea 
+		roja marca el valor esperado $E(X) = 445$ — el centro de masa de 
+		la distribución.}
+	\label{fig:ev}
+\end{figure}
+
 \subsection{Varianza}
+
+El valor esperado nos dice dónde está el centro de la distribución, 
+pero no dice nada sobre qué tan dispersos están los valores de $X$ 
+alrededor de ese centro. Dos distribuciones pueden tener el mismo 
+$E(X)$ y ser completamente distintas en su dispersión. La 
+\textbf{varianza} cuantifica esa dispersión.
+
+\begin{definicion}{Varianza}{var}
+	Sea $X$ una variable aleatoria discreta con $E(X) = \mu$. La 
+	\textbf{varianza} de $X$, denotada $\text{Var}(X)$, $V(X)$, 
+	$\sigma^2_X$ o $\sigma^2$, es:
+	\[
+	\text{Var}(X) = E\!\left[(X - \mu)^2\right] 
+	= \sum_{x \in \text{Rec}(X)} (x - \mu)^2\, p_X(x)
+	\]
+	La \textbf{desviación estándar} de $X$ es $\sigma_X = 
+	\sqrt{\text{Var}(X)}$.
+\end{definicion}
+
+El paralelismo con la física se extiende a la varianza. En mecánica 
+clásica, el \textbf{momento de inercia} de un sistema de partículas 
+respecto a un eje que pasa por el centro de masa es:
+\[
+I = \sum_i m_i (x_i - \bar{x})^2
+\]
+Bajo normalización de las masas, esto es exactamente:
+\[
+I = \sum_i (x_i - \bar{x})^2\, p_i = \text{Var}(X)
+\]
+La varianza mide lo mismo que el momento de inercia: qué tan 
+\textit{lejos} están las masas — o las probabilidades — del centro. 
+Un sistema con masas muy dispersas tiene momento de inercia grande; 
+una distribución con valores muy dispersos alrededor de $\mu$ tiene 
+varianza grande. La figura~\ref{fig:fisica_var} ilustra esta 
+equivalencia.
+
+\begin{figure}[H]
+	\centering
+	\begin{tikzpicture}[scale=1.0]
+		% ============ PANEL IZQUIERDO: física ============
+		\begin{scope}[shift={(0,0)}]
+			\node[font=\small\bfseries] at (3,4.0) {Sistema físico};
+			\draw[thick] (0,0) -- (6.5,0);
+			\draw[rojo, very thick, dashed] (3.1,-1.2) -- (3.1,3.2);
+			\node[rojo, font=\scriptsize] at (3.1,3.45) {$\bar{x}$};
+			\foreach \x/\r in {1.0/8pt, 2.4/11pt, 3.8/13pt, 5.2/6pt}{
+				\draw[gray, thin] (\x, 0) -- (\x, -0.5);
+				\fill[azul!60] (\x, 0) circle (\r);
+			}
+			\node[font=\scriptsize, white] at (1.0,0) {$m_1$};
+			\node[font=\scriptsize, white] at (2.4,0) {$m_2$};
+			\node[font=\scriptsize, white] at (3.8,0) {$m_3$};
+			\node[font=\scriptsize, white] at (5.2,0) {$m_4$};
+			\draw[verde, very thick] (1.0,-0.5) -- (3.1,-0.5);
+			\draw[verde, thick] (1.0,-0.55) -- (1.0,-0.45);
+			\draw[verde, thick] (3.1,-0.55) -- (3.1,-0.45);
+			\node[verde, font=\scriptsize] at (2.05,-0.82) {$|x_1-\bar{x}|$};
+			\draw[azul!70, very thick] (2.4,-0.5) -- (3.1,-0.5);
+			\draw[Goldenrod!80!black, very thick] (3.1,-0.5) -- (3.8,-0.5);
+			\draw[rojo!70, very thick] (3.1,-0.5) -- (5.2,-0.5);
+			\draw[rojo!70, thick] (5.2,-0.55) -- (5.2,-0.45);
+			\node[rojo!70, font=\scriptsize] at (4.15,-0.82) {$|x_4-\bar{x}|$};
+			\node[font=\scriptsize] at (3.1,-1.5) 
+			{$I = \displaystyle\sum_i m_i(x_i-\bar{x})^2$};
+			\node[font=\scriptsize] at (3.1,-2.0) {momento de inercia};
+		\end{scope}
+	% Signo de igualdad + etiqueta de mapeo
+	\node[font=\Large] at (7.2, 0.5) {$\equiv$};
+	\node[font=\scriptsize, gray, align=center] at (7.2, -0.75) 
+	{masa (área)\\$=$\\prob. (altura)};
+		% ============ PANEL DERECHO: probabilidad ============
+		\begin{scope}[shift={(7.8,0)}]
+			\node[font=\small\bfseries] at (3,4.0) {Modelo probabilístico};
+			\draw[thick] (0,0) -- (6.5,0);
+			\draw[rojo, very thick, dashed] (3.1,-1.2) -- (3.1,3.2);
+			\node[rojo, font=\scriptsize] at (3.1,3.45) {$\mu$};
+			\foreach \x/\h in {1.0/1.2, 2.4/1.8, 3.8/2.1, 5.2/0.9}{
+				\fill[azul!30] (\x-0.22,0) rectangle (\x+0.22,\h);
+				\draw[azul, thick] (\x-0.22,0) rectangle (\x+0.22,\h);
+				\draw[gray, thin] (\x,0) -- (\x,-0.5);
+			}
+			\draw[verde, very thick] (1.0,-0.5) -- (3.1,-0.5);
+			\draw[verde, thick] (1.0,-0.55) -- (1.0,-0.45);
+			\draw[verde, thick] (3.1,-0.55) -- (3.1,-0.45);
+			\node[verde, font=\scriptsize] at (2.05,-0.82) {$|x_1-\mu|$};
+			\draw[azul!70, very thick] (2.4,-0.5) -- (3.1,-0.5);
+			\draw[Goldenrod!80!black, very thick] (3.1,-0.5) -- (3.8,-0.5);
+			\draw[rojo!70, very thick] (3.1,-0.5) -- (5.2,-0.5);
+			\draw[rojo!70, thick] (5.2,-0.55) -- (5.2,-0.45);
+			\node[rojo!70, font=\scriptsize] at (4.15,-0.82) {$|x_4-\mu|$};
+			\node[font=\scriptsize] at (3.1,-1.5)
+			{$\text{Var}(X) = \displaystyle\sum_x (x-\mu)^2 p_X(x)$};
+			\node[font=\scriptsize] at (3.1,-2.0) {varianza};
+		\end{scope}
+	\end{tikzpicture}
+	\caption{La varianza como momento de inercia. Los segmentos de color 
+		bajo el eje muestran la distancia $|x_i - \bar{x}|$ de cada valor 
+		al centro. La varianza pondera el \textit{cuadrado} de esas distancias 
+		por la masa (o probabilidad) correspondiente.}
+	\label{fig:fisica_var}
+\end{figure}
+
+\begin{observacion}
+	La varianza promedia el \textit{cuadrado} de las desviaciones 
+	respecto a $\mu$, no las desviaciones directas. Esto tiene dos 
+	razones: primero, las desviaciones positivas y negativas no se 
+	cancelan; segundo, las desviaciones grandes pesan 
+	desproporcionadamente más, lo que hace a la varianza sensible 
+	a valores extremos. La desviación estándar $\sigma_X$ devuelve 
+	la dispersión a las unidades originales de $X$.
+\end{observacion}
+
+\begin{figure}[H]
+	\centering
+	\begin{tikzpicture}
+		\begin{axis}[
+			width=11cm, height=5.5cm,
+			xmin=250, xmax=650,
+			ymin=-0.08, ymax=0.50,
+			xlabel={$x$},
+			ylabel={$p_X(x)$},
+			axis lines=left,
+			xtick={300,400,500,600},
+			ytick={0.10,0.20,0.30,0.35},
+			yticklabels={$0.10$,$0.20$,$0.30$,$0.35$},
+			tick label style={font=\small},
+			label style={font=\small},
+			]
+			\addplot[ybar, bar width=30pt, fill=azul!30, draw=azul]
+			coordinates {(300,0.20)(400,0.30)(500,0.35)(600,0.15)};
+			\addplot[thick, rojo, dashed] coordinates {(445,0) (445,0.42)};
+			\node[font=\small, rojo] at (axis cs:445,0.44) {$\mu=445$};
+		\draw[<->,verde,thick] (axis cs:300,-0.04) -- (axis cs:445,-0.04);
+		\node[font=\scriptsize,verde] at (axis cs:372,-0.062) 
+		{$|300-\mu|=145$};
+		\draw[<->,verde,thick] (axis cs:445,-0.04) -- (axis cs:600,-0.04);
+		\node[font=\scriptsize,verde] at (axis cs:522,-0.062) 
+		{$|600-\mu|=155$};
+		\end{axis}
+	\end{tikzpicture}
+	\caption{La varianza mide la dispersión de $X$ alrededor de 
+		$\mu = E(X) = 445$. Las flechas ilustran las desviaciones 
+		$|x - \mu|$ para los valores extremos del recorrido.}
+	\label{fig:var}
+\end{figure}
+
+\begin{proposicion}{Fórmula alternativa de la varianza}{var_alt}
+	\[
+	\text{Var}(X) = E(X^2) - (E(X))^2
+	\]
+\end{proposicion}
+
+\begin{proof}
+	Sea $\mu = E(X)$. Expandimos el cuadrado en la definición:
+	\[
+	\text{Var}(X) 
+	= \sum_{x \in \text{Rec}(X)} (x - \mu)^2\, p_X(x)
+	= \sum_{x} (x^2 - 2\mu x + \mu^2)\, p_X(x)
+	\]
+	Distribuimos la suma:
+	\[
+	= \sum_{x} x^2\, p_X(x) 
+	- 2\mu \sum_{x} x\, p_X(x) 
+	+ \mu^2 \sum_{x} p_X(x)
+	\]
+	Reconocemos cada término: el primero es $E(X^2)$ por la 
+	Proposición~\ref{prop:ev_hx} con $h(x) = x^2$; el segundo 
+	usa $\sum x\, p_X(x) = \mu$; el tercero usa $\sum p_X(x) = 1$:
+	\[
+	= E(X^2) - 2\mu \cdot \mu + \mu^2 \cdot 1
+	= E(X^2) - 2\mu^2 + \mu^2
+	= E(X^2) - \mu^2
+	= E(X^2) - (E(X))^2 \qedhere
+	\]
+\end{proof}
+
+\begin{observacion}
+	La fórmula alternativa es la que se usa en la práctica: calcular 
+	$E(X^2) - (E(X))^2$ requiere solo dos sumas, mientras que la 
+	definición directa requiere calcular $(x - \mu)^2$ para cada 
+	valor del recorrido — más laborioso cuando el recorrido es grande.
+\end{observacion}
+
+\begin{proposicion}{Propiedades de la varianza}{props_var}
+	Sean $a$ y $b$ constantes. Entonces:
+	
+	\medskip
+	\noindent\textbf{i)} $\text{Var}(X) \geq 0$
+	
+	\medskip
+	\noindent\textbf{ii)} $\text{Var}(a) = 0$
+	
+	\medskip
+	\noindent\textbf{iii)} $\text{Var}(aX + b) = a^2\,\text{Var}(X)$
+	\quad y \quad $\sigma_{aX+b} = |a|\,\sigma_X$
+\end{proposicion}
+
+\begin{proof}
+	\textbf{i)} Cada término $(x-\mu)^2 p_X(x) \geq 0$, luego 
+	la suma también. $\square$
+	
+	\medskip
+	\textbf{ii)} Si $a$ es constante, $E(a) = a$ y 
+	$(a - E(a))^2 = 0$ para todo resultado, luego 
+	$\text{Var}(a) = 0$. $\square$
+	
+	\medskip
+	\textbf{iii)} Por la linealidad del valor esperado 
+	(Proposición~\ref{prop:ev_lineal}), $E(aX+b) = aE(X)+b = 
+	a\mu + b$. Aplicando la fórmula alternativa:
+	\[
+	\text{Var}(aX+b) 
+	= E\!\left[(aX+b)^2\right] - (aE(X)+b)^2
+	\]
+	\[
+	= E\!\left[a^2X^2 + 2abX + b^2\right] - 
+	(a^2\mu^2 + 2ab\mu + b^2)
+	\]
+	\[
+	= a^2E(X^2) + 2ab\mu + b^2 - a^2\mu^2 - 2ab\mu - b^2
+	= a^2\!\left(E(X^2) - \mu^2\right)
+	= a^2\,\text{Var}(X)
+	\]
+	La desviación estándar sigue como 
+	$\sigma_{aX+b} = \sqrt{a^2\,\text{Var}(X)} = 
+	|a|\,\sigma_X$. $\qedhere$
+\end{proof}
+
+\begin{observacion}
+	La propiedad iii revela algo importante: sumar una constante 
+	$b$ a $X$ \textbf{no cambia la varianza} — desplaza la 
+	distribución pero no altera su dispersión. Solo la 
+	multiplicación por $a$ escala la varianza, y lo hace de manera 
+	cuadrática.
+\end{observacion}
 
 \section{Distribuciones importantes}
 
