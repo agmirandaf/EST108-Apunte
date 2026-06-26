@@ -31,6 +31,8 @@
 % ── COLORES Y CAJAS ───────────────────────────────────────
 \usepackage[dvipsnames]{xcolor}
 \usepackage[most, breakable]{tcolorbox}
+\usepackage{colortbl}
+\usepackage{multirow}
 
 % ── GRÁFICOS ──────────────────────────────────────────────
 \usepackage{tikz}
@@ -65,6 +67,8 @@
 \definecolor{verde}     {RGB}{0,   90,  50}
 \definecolor{verdeclaro}{RGB}{230, 255, 240}
 \definecolor{gris}      {RGB}{245, 245, 245}
+\definecolor{naranjo}      {RGB}{153,  76,   0}
+\definecolor{naranjaclaro} {RGB}{255, 240, 220}
 
 % ==========================================================
 %               ENTORNOS MATEMÁTICOS
@@ -116,6 +120,15 @@
 \newenvironment{observacion}{%
     \par\medskip\noindent\textbf{\color{azul}Observaci\'{o}n.}\enspace\itshape
 }{\par\medskip}
+
+\newtcbtheorem[number within=chapter]{ejemplo}{Ejemplo}{
+	enhanced, breakable,
+	colback=naranjaclaro, colframe=naranjo,
+	fonttitle=\bfseries\color{white}, coltitle=white,
+	attach boxed title to top left={yshift=-2mm, xshift=6mm},
+	boxed title style={colback=naranjo, rounded corners},
+	separator sign={\ ---\ },
+}{ej}
 
 \renewcommand{\qedsymbol}{$\blacksquare$}
 \renewenvironment{proof}{%
@@ -1764,6 +1777,61 @@ $E(X)$ y ser completamente distintas en su dispersión. La
 	\sqrt{\text{Var}(X)}$.
 \end{definicion}
 
+La razón de elevar al cuadrado en la definición de la varianza es 
+puramente \textbf{matemática}, y se entiende mejor a través del 
+\textbf{método de mínimos cuadrados}. El problema fundamental es 
+el siguiente: dado un conjunto de observaciones $x_1, x_2, \ldots, 
+x_n$, ¿qué valor $\mu$ minimiza la dispersión total? Es decir, 
+¿cuál es el mejor representante central de los datos?
+
+La respuesta depende de cómo midamos la dispersión. Si definimos 
+la dispersión total como la suma de las desviaciones al cuadrado:
+\[
+S(\mu) = \sum_{i=1}^n (x_i - \mu)^2
+\]
+entonces minimizar $S(\mu)$ respecto a $\mu$ es trivial — derivamos 
+e igualamos a cero:
+\[
+\frac{dS}{d\mu} = -2\sum_{i=1}^n (x_i - \mu) = 0 
+\implies \mu = \frac{1}{n}\sum_{i=1}^n x_i
+\]
+El minimizador es exactamente la \textbf{media aritmética}. Esto no 
+es una coincidencia — es la razón por la que la media y la varianza 
+están tan profundamente ligadas: la varianza mide la dispersión 
+respecto al único punto que la minimiza.
+
+Gauss y Legendre eligieron el cuadrado sobre cualquier alternativa 
+porque produce estas propiedades matemáticas superiores:
+
+\begin{itemize}
+	\item Es \textbf{convexa} — tiene un único mínimo global, 
+	garantizando que la solución es única.
+	\item Es \textbf{diferenciable en todas partes} — permite 
+	minimizar analíticamente sin casos especiales.
+	\item Tiene \textbf{solución analítica cerrada} — la media, 
+	obtenida directamente sin métodos numéricos.
+	\item Conecta naturalmente con la \textbf{distribución normal}, 
+	cuya densidad es proporcional a $e^{-x^2/2}$.
+\end{itemize}
+
+La alternativa más intuitiva habría sido minimizar la suma de valores 
+absolutos $\sum_i |x_i - \mu|$ — la llamada \textbf{desviación media 
+	absoluta} — que tiene interpretación más directa pero no es 
+diferenciable en $x = 0$ y no tiene solución analítica cerrada. 
+El cuadrado ganó por sus propiedades matemáticas, no por intuición.
+
+El costo de elevar al cuadrado es \textbf{dimensional}: si $X$ mide 
+demanda en unidades de producto, $\text{Var}(X)$ está en 
+unidades$^2$, lo que hace imposible comparar la dispersión 
+directamente con el valor esperado. La \textbf{desviación estándar} 
+$\sigma_X = \sqrt{\text{Var}(X)}$ existe precisamente para resolver 
+eso — devuelve la dispersión a las mismas unidades que $X$, 
+permitiendo afirmaciones del tipo \textit{«el valor típico de $X$ 
+	se aleja de $\mu$ aproximadamente $\sigma_X$ unidades»}. En la 
+práctica, la varianza se usa en demostraciones y cálculos por su 
+mejor comportamiento algebraico, mientras que la desviación estándar 
+se usa para interpretar y comunicar resultados.
+
 El paralelismo con la física se extiende a la varianza. En mecánica 
 clásica, el \textbf{momento de inercia} de un sistema de partículas 
 respecto a un eje que pasa por el centro de masa es:
@@ -1983,42 +2051,3739 @@ equivalencia.
 
 \section{Distribuciones importantes}
 
+Hasta ahora hemos definido la variable aleatoria discreta en su forma más
+general: una función $X:\Omega\to\mathbb{R}$ equipada con una función de masa
+$p_X$ arbitraria. Sin embargo, en la práctica aparecen ciertas
+\textbf{estructuras de experimento} que se repiten una y otra vez ---y cada
+estructura genera siempre la misma forma de distribución.
+
+\subsection{Distribuci\'{o}n de Bernoulli}
+
+\begin{definicion}{Experimento de Bernoulli}{exp_bernoulli}
+	Sea $(\Omega, \mathcal{A}, P)$ un espacio de probabilidad. Un
+	\textbf{experimento de Bernoulli} es aquel en que el resultado de
+	interés queda determinado por un evento $A \in \mathcal{A}$,
+	llamado \textbf{éxito}, con $P(A) = p \in (0,1)$. Su complemento
+	$A^c$ se denomina \textbf{fracaso} y tiene probabilidad $1-p$.
+\end{definicion}
+
+El espacio muestral $\Omega$ puede tener cualquier cardinalidad ---lo que
+define al experimento como de Bernoulli es la \textbf{partición binaria}
+$\{A,\, A^c\}$ del espacio, no la estructura de $\Omega$. Por ejemplo,
+al lanzar un dado de seis caras y definir $A = \{\text{sale par}\}$, el
+espacio muestral tiene seis elementos, pero el experimento es de Bernoulli
+con $p = 1/2$.
+
+\begin{definicion}{Variable aleatoria Bernoulli}{va_bernoulli}
+	Sea $(\Omega, \mathcal{A}, P)$ el espacio de probabilidad de un
+	experimento de Bernoulli con evento de éxito $A$ y probabilidad
+	$p = P(A)$. La \textbf{variable aleatoria Bernoulli} asociada a $A$
+	es la \textbf{función indicadora} de $A$:
+	\[
+	X(\omega) = \mathbf{1}_A(\omega) \;=\;
+	\begin{cases}
+		1 & \text{si } \omega \in A, \\
+		0 & \text{si } \omega \notin A.
+	\end{cases}
+	\]
+	Se escribe $X \sim \mathrm{Bernoulli}(p)$.
+\end{definicion}
+
+\begin{proposicion}{Funci\'{o}n de masa Bernoulli}{pmf_bern}
+	Si $X \sim \mathrm{Bernoulli}(p)$, entonces
+	\[
+	p_X(x) = p^x(1-p)^{1-x}, \qquad x \in \{0,1\}.
+	\]
+\end{proposicion}
+
+\begin{proof}
+	Directamente de la definición de $X$ y de $P(A) = p$:
+	\[
+	p_X(1) = P(X=1) = P(A) = p,
+	\qquad
+	p_X(0) = P(X=0) = P(A^c) = 1-p,
+	\]
+	que se unifica en $p^x(1-p)^{1-x}$ para $x \in \{0,1\}$. \qedhere
+\end{proof}
+
+\begin{observacion}
+	La \textbf{función indicadora} $\mathbf{1}_A : \Omega \to \{0,1\}$
+	es un objeto general de la matemática: dado cualquier conjunto
+	$A \subseteq \Omega$, vale $1$ exactamente donde ocurre el evento y
+	$0$ en el resto. La variable aleatoria Bernoulli no se \emph{parece}
+	a una función indicadora --- es literalmente la misma cosa, vista
+	ahora sobre un espacio de probabilidad. En análisis aparece con el
+	nombre de función característica de un conjunto y se denota
+	$\chi_A$; en probabilidad el nombre estándar es el que usamos aquí.
+\end{observacion}
+
+\begin{observacion}
+	La expresión $p^x(1-p)^{1-x}$ es una fórmula compacta que unifica
+	ambos casos: si $x=1$, entrega $p^1(1-p)^0 = p$; si $x=0$, entrega
+	$p^0(1-p)^1 = 1-p$. Es habitual denotar $q \coloneqq 1-p$.
+\end{observacion}
+
+\begin{proposicion}{Momentos de la distribuci\'{o}n Bernoulli}
+	{momentos_bern}
+	Si $X \sim \mathrm{Bernoulli}(p)$ con $p \in (0,1)$, entonces
+	\[
+	E(X) = p \qquad \text{y} \qquad \mathrm{Var}(X) = p(1-p).
+	\]
+\end{proposicion}
+
+\begin{proof}
+	\textbf{Valor esperado.} Aplicando la definición directamente:
+	\[
+	E(X) = 0\cdot p_X(0) + 1\cdot p_X(1) = 0(1-p) + 1\cdot p = p.
+	\]
+	
+	\textbf{Varianza.} Usamos la fórmula alternativa
+	$\mathrm{Var}(X) = E(X^2) - (E(X))^2$. Como $X$ solo toma valores
+	en $\{0,1\}$, se tiene $x^2 = x$ para todo $x$ en el recorrido de
+	$X$, luego $E(X^2) = E(X) = p$. Por lo tanto:
+	\[
+	\mathrm{Var}(X) = p - p^2 = p(1-p). \qedhere
+	\]
+\end{proof}
+
+\begin{figure}[H]
+	\centering
+	\begin{tikzpicture}
+		% Ejes
+		\draw[thick, ->] (-0.5,0) -- (4.0,0) node[right] {$x$};
+		\draw[thick, ->] (0,-0.1) -- (0,3.3)
+		node[above] {$p_X(x)$};
+		
+		% Barra x=0: altura = (1-p)*4 = 0.65*4 = 2.6  (p=0.35)
+		\fill[azul!20] (0.75,0) rectangle (1.25,2.6);
+		\draw[azul,thick] (0.75,0) rectangle (1.25,2.6);
+		\node[below] at (1.0,0) {$0$};
+		\draw[azul,dashed,thin] (0,2.6) -- (0.75,2.6);
+		\node[azul,left,font=\small] at (0,2.6) {$1{-}p$};
+		
+		% Barra x=1: altura = p*4 = 0.35*4 = 1.4
+		\fill[rojo!20] (2.75,0) rectangle (3.25,1.4);
+		\draw[rojo,thick] (2.75,0) rectangle (3.25,1.4);
+		\node[below] at (3.0,0) {$1$};
+		\draw[rojo,dashed,thin] (0,1.4) -- (2.75,1.4);
+		\node[rojo,left,font=\small] at (0,1.4) {$p$};
+		
+		% Marcas en eje y
+		\foreach \y in {0.5,1.0,1.5,2.0,2.5}{
+			\draw[gray,very thin] (0.03,\y)--(-0.03,\y);
+		}
+		
+		% Nota
+		\node[gray,font=\small] at (2.5,3.1) {Ejemplo: $p = 0.35$};
+	\end{tikzpicture}
+	\caption{Función de masa de $X \sim \mathrm{Bernoulli}(0.35)$.
+		La probabilidad de fracaso es $1-p = 0.65$ y la de éxito es $p = 0.35$.}
+	\label{fig:pmf_bernoulli}
+\end{figure}
+
+La distribución Bernoulli modela un único ensayo. La pregunta natural que
+sigue es: ¿qué ocurre si repetimos el experimento $n$ veces? Para que esa
+repetición tenga sentido probabilístico se necesita precisar las condiciones
+bajo las cuales opera.
+
+\begin{definicion}{Variables aleatorias i.i.d.}{iid}
+	Una colección de variables aleatorias $X_1, X_2, \ldots, X_n$ se
+	dice \textbf{independientes e idénticamente distribuidas} (i.i.d.)
+	si satisface dos condiciones:
+	\begin{enumerate}[label=\textbf{\roman*)}]
+		\item \textbf{Independencia:} para todo $(x_1, x_2, \ldots, x_n)$,
+		\[
+		P(X_1 = x_1,\, X_2 = x_2,\, \ldots,\, X_n = x_n)
+		= \prod_{i=1}^{n} P(X_i = x_i).
+		\]
+		\item \textbf{Identidad de distribución:} todas las $X_i$ tienen
+		la misma función de masa, es decir, $p_{X_i} = p_{X_j}$ para
+		todo $i \neq j$.
+	\end{enumerate}
+\end{definicion}
+
+\begin{observacion}
+	El concepto i.i.d.\ es uno de los pilares de la estadística: la
+	mayor parte de los resultados clásicos --- incluyendo el Teorema del
+	Límite Central --- asumen que las observaciones de una muestra son
+	i.i.d. La condición de independencia formaliza la intuición de que
+	el resultado de un ensayo no afecta a los demás; la de identidad de
+	distribución formaliza que todos los ensayos operan bajo las mismas
+	condiciones.
+\end{observacion}
+
+\begin{definicion}{Proceso de Bernoulli}{proceso_bernoulli}
+	Un \textbf{proceso de Bernoulli} con $n$ ensayos y probabilidad de
+	éxito $p \in (0,1)$ es una colección de variables aleatorias
+	i.i.d.\ $X_1, X_2, \ldots, X_n$ con
+	\[
+	X_i \sim \mathrm{Bernoulli}(p) \qquad \text{para todo }
+	i = 1, 2, \ldots, n.
+	\]
+\end{definicion}
+
+\begin{observacion}
+	Las tres condiciones que se enuncian habitualmente --- ensayos
+	binarios, independencia y probabilidad constante --- están todas
+	contenidas en esta definición: la distribución Bernoulli garantiza
+	la binaridad, la i.i.d.\ garantiza simultáneamente la independencia
+	y la constancia de $p$.
+\end{observacion}
+
 \subsection{Distribuci\'{o}n Binomial}
 
+\begin{definicion}{Distribuci\'{o}n Binomial}{dist_binomial}
+	Sea $X_1, X_2, \ldots, X_n$ un proceso de Bernoulli con probabilidad
+	de éxito $p \in (0,1)$ (Definición~\ref{def:proceso_bernoulli}).
+	La \textbf{variable aleatoria Binomial} con parámetros $n$ y $p$ es
+	la suma
+	\[
+	X = \sum_{i=1}^{n} X_i,
+	\]
+	que cuenta el número de éxitos en los $n$ ensayos. Se escribe
+	$X \sim \mathrm{Binomial}(n,p)$.
+\end{definicion}
+
+\begin{proposicion}{Funci\'{o}n de masa Binomial}{pmf_binom}
+	Si $X \sim \mathrm{Binomial}(n,p)$, entonces
+	\[
+	p_X(x) = \binom{n}{x}\, p^{\,x}(1-p)^{n-x},
+	\qquad x = 0, 1, \ldots, n.
+	\]
+\end{proposicion}
+
+\begin{proof}
+	Sea $x \in \{0,1,\ldots,n\}$. El evento $\{X = x\}$ ocurre cuando
+	exactamente $x$ de los $n$ ensayos resultan en éxito. Consideremos
+	primero una secuencia específica con éxitos en las posiciones
+	$i_1,\ldots,i_x$ y fracasos en las restantes $j_1,\ldots,j_{n-x}$.
+	Por la independencia de las $X_i$:
+	\[
+	P\!\left(X_{i_1}=1,\ldots,X_{i_x}=1,\;
+	X_{j_1}=0,\ldots,X_{j_{n-x}}=0\right)
+	= p^{\,x}(1-p)^{n-x}.
+	\]
+	Esta probabilidad es la misma para \emph{toda} secuencia con
+	exactamente $x$ éxitos, independientemente de en qué posiciones
+	ocurran. El número de secuencias distintas con $x$ éxitos en $n$
+	posiciones es $\binom{n}{x}$, y los eventos correspondientes son
+	mutuamente excluyentes. Por lo tanto:
+	\[
+	p_X(x) = P(X=x) = \binom{n}{x}\,p^{\,x}(1-p)^{n-x}. \qedhere
+	\]
+\end{proof}
+
+El nombre \emph{distribución binomial} no es arbitrario. Para que
+$p_X$ sea una función de masa válida debe cumplirse que
+$\sum_{x=0}^{n} p_X(x) = 1$, y la verificación revela la conexión:
+\[
+\sum_{x=0}^{n} \binom{n}{x}\, p^{\,x}(1-p)^{n-x}
+= \bigl(p + (1-p)\bigr)^n = 1.
+\]
+El paso central es el \textbf{teorema del binomio}, que establece que
+para cualesquiera $a, b \in \mathbb{R}$ y $n \in \mathbb{N}$,
+\[
+(a+b)^n = \sum_{x=0}^{n} \binom{n}{x}\, a^{\,x}\, b^{n-x}.
+\]
+Es decir, los coeficientes $\binom{n}{x}$ que aparecen en la función
+de masa son exactamente los coeficientes que surgen al expandir un
+binomio elevado a la $n$ --- de ahí el nombre. La distribución binomial
+no hace más que repartir la unidad $(p + (1-p))^n = 1$ entre todos los
+posibles conteos de éxitos.
+
+\begin{proposicion}{Momentos de la distribuci\'{o}n Binomial}
+	{momentos_binom}
+	Si $X \sim \mathrm{Binomial}(n,p)$ con $p \in (0,1)$, entonces
+	\[
+	E(X) = np \qquad \text{y} \qquad \mathrm{Var}(X) = np(1-p).
+	\]
+\end{proposicion}
+
+\begin{proof}
+	Escribimos $X = X_1 + \cdots + X_n$ con $X_i \sim \mathrm{Bernoulli}(p)$
+	i.i.d.\ (Definición~\ref{def:dist_binomial}).
+	
+	\textbf{Valor esperado.} Por linealidad del valor esperado
+	(Proposición~\ref{prop:ev_lineal}):
+	\[
+	E(X) = \sum_{i=1}^{n} E(X_i) = \sum_{i=1}^{n} p = np.
+	\]
+	
+	\textbf{Varianza.} La independencia de las $X_i$ implica que no
+	hay términos cruzados en la varianza de la suma, de modo que
+	\[
+	\mathrm{Var}(X) = \sum_{i=1}^{n} \mathrm{Var}(X_i)
+	= \sum_{i=1}^{n} p(1-p) = np(1-p). \qedhere
+	\]
+\end{proof}
+
+\begin{observacion}
+	La aditividad de la varianza bajo independencia --- usada en la
+	demostración anterior --- es un resultado que se justificará
+	formalmente en el Tema~3 al introducir el concepto de covarianza.
+	Por ahora basta saber que cuando las variables son independientes,
+	los términos cruzados son cero y la varianza de la suma se reduce
+	a la suma de las varianzas.
+\end{observacion}
+
+\begin{figure}[H]
+	\centering
+	\begin{tikzpicture}[scale=0.90]
+		% Binomial(n=10, p=0.30) escalado por 10
+		% k=0:  0.0282  -> 0.282
+		% k=1:  0.1211  -> 1.211
+		% k=2:  0.2335  -> 2.335
+		% k=3:  0.2668  -> 2.668  (moda)
+		% k=4:  0.2001  -> 2.001
+		% k=5:  0.1029  -> 1.029
+		% k=6:  0.0368  -> 0.368
+		% k=7:  0.0090  -> 0.090
+		% k=8:  0.0014  -> 0.014
+		
+		\def\bw{0.30}
+		
+		\draw[thick,->] (-0.5,0) -- (11.0,0) node[right] {$x$};
+		\draw[thick,->] (0,-0.1) -- (0,3.3) node[above] {$p_X(x)$};
+		
+		\draw[gray,thin,dashed] (0,2.668) -- (10.5,2.668);
+		\node[gray,left,font=\scriptsize] at (0,2.668) {$0.267$};
+		
+		\foreach \k/\h in {%
+			0/0.282, 1/1.211, 2/2.335, 3/2.668, 4/2.001,%
+			5/1.029, 6/0.368, 7/0.090, 8/0.014}{
+			\pgfmathsetmacro{\xp}{\k+1}
+			\fill[azul!25] (\xp-\bw,0) rectangle (\xp+\bw,\h);
+			\draw[azul,thick] (\xp-\bw,0) rectangle (\xp+\bw,\h);
+			\node[below,font=\scriptsize] at (\xp,0) {$\k$};
+		}
+		
+		\draw[rojo,thick,dashed] (4,0) -- (4,2.9);
+		\node[rojo,above,font=\small] at (4,2.9) {$\mu = np = 3$};
+		
+		\node[font=\small,gray] at (7.5,3.15)
+		{$X\sim\mathrm{Binomial}(10,\;0.30)$};
+	\end{tikzpicture}
+	\caption{Función de masa de $X\sim\mathrm{Binomial}(10,0.30)$.
+		La distribución es asimétrica hacia la derecha para $p<0.5$,
+		con moda en $x=3$ y media $E(X)=np=3$.}
+	\label{fig:pmf_binomial}
+\end{figure}
+
+Vale la pena contrastar ambas distribuciones: Bernoulli responde
+\emph{¿ocurrió el evento?} en un único ensayo --- la variable solo
+puede valer $0$ o $1$. Binomial responde \emph{¿cuántas veces ocurrió?}
+en $n$ ensayos --- la variable toma valores en $\{0,1,\ldots,n\}$.
+La relación entre ambas es exacta: $\mathrm{Bernoulli}(p) =
+\mathrm{Binomial}(1,p)$.
+
 \subsection{Distribuci\'{o}n de Poisson}
+
+La distribución Binomial requiere que el número de ensayos $n$ sea
+finito y fijo. Sin embargo, hay fenómenos donde los eventos pueden
+ocurrir en cualquier punto de un intervalo continuo --- el tiempo, el
+espacio, una superficie --- y no tiene sentido hablar de un $n$ fijo.
+¿Cuántos autos pasan por una intersección en una hora? ¿Cuántos
+mensajes llegan a un servidor en un minuto? ¿Cuántas imperfecciones
+hay en un metro de cable?
+
+La idea para modelar este tipo de fenómenos es la siguiente: dividamos
+el intervalo en $n$ subintervalos tan pequeños que en cada uno pueda
+ocurrir a lo más un evento, con probabilidad $p = \lambda/n$, donde
+$\lambda > 0$ es la tasa promedio de ocurrencia. Esto define un proceso
+de Bernoulli con $n$ ensayos y probabilidad $\lambda/n$, de modo que
+el número de eventos $X_n \sim \mathrm{Binomial}(n, \lambda/n)$. La
+distribución de Poisson emerge al tomar el límite $n \to \infty$ ---
+subintervalos infinitesimales.
+
+\begin{proposicion}{L\'{\i}mite de la Binomial}{limite_binomial}
+	Sea $k \in \mathbb{N}_0$ fijo y $\lambda > 0$. Entonces
+	\[
+	\lim_{n\to\infty}
+	\binom{n}{k}
+	\left(\frac{\lambda}{n}\right)^k
+	\left(1-\frac{\lambda}{n}\right)^{n-k}
+	= \frac{\lambda^k e^{-\lambda}}{k!}.
+	\]
+\end{proposicion}
+
+\begin{proof}
+	Separamos el término en tres factores:
+	\[
+	\binom{n}{k}
+	\left(\frac{\lambda}{n}\right)^k
+	\left(1-\frac{\lambda}{n}\right)^{n-k}
+	= \frac{\lambda^k}{k!}
+	\cdot
+	\underbrace{\frac{n(n-1)\cdots(n-k+1)}{n^k}}_{(A)}
+	\cdot
+	\underbrace{\left(1-\frac{\lambda}{n}\right)^{n}}_{(B)}
+	\cdot
+	\underbrace{\left(1-\frac{\lambda}{n}\right)^{-k}}_{(C)}.
+	\]
+	Analizamos el límite de cada uno.
+	
+	\textbf{Factor (A).} Reescribiendo:
+	\[
+	\frac{n(n-1)\cdots(n-k+1)}{n^k}
+	= \prod_{j=0}^{k-1}\!\left(1-\frac{j}{n}\right) \;\to\; 1
+	\quad\text{cuando } n\to\infty.
+	\]
+	
+	\textbf{Factor (C).} Como $\lambda/n \to 0$, se tiene
+	$\left(1-\lambda/n\right)^{-k} \to 1$.
+	
+	\textbf{Factor (B).} Tomamos logaritmo y reescribimos la
+	indeterminación $\infty\cdot 0$ como $0/0$:
+	\[
+	\ln\!\left(1-\frac{\lambda}{n}\right)^{\!n}
+	= n\ln\!\left(1-\frac{\lambda}{n}\right)
+	= \frac{\ln\!\left(1-\dfrac{\lambda}{n}\right)}{1/n}.
+	\]
+	Aplicando la regla de L'H\^{o}pital (tratando $n$ como variable
+	continua):
+	\[
+	\lim_{n\to\infty}
+	\frac{\ln(1-\lambda/n)}{1/n}
+	= \lim_{n\to\infty}
+	\frac{\dfrac{\lambda/n^2}{1-\lambda/n}}{-1/n^2}
+	= \lim_{n\to\infty}
+	\frac{-\lambda}{1-\lambda/n} = -\lambda.
+	\]
+	Por continuidad de la exponencial:
+	$\left(1-\lambda/n\right)^n \to e^{-\lambda}$.
+	
+	Combinando los tres factores:
+	\[
+	\lim_{n\to\infty}
+	\binom{n}{k}
+	\left(\frac{\lambda}{n}\right)^k
+	\left(1-\frac{\lambda}{n}\right)^{n-k}
+	= \frac{\lambda^k}{k!}\cdot 1 \cdot e^{-\lambda}\cdot 1
+	= \frac{\lambda^k e^{-\lambda}}{k!}. \qedhere
+	\]
+\end{proof}
+
+La proposición anterior muestra que al tomar subintervalos
+infinitesimales, la probabilidad de observar exactamente $k$ eventos
+converge a $\lambda^k e^{-\lambda}/k!$. Esto motiva la siguiente
+definición.
+
+\begin{definicion}{Distribuci\'{o}n de Poisson}{dist_poisson}
+	Una variable aleatoria discreta $X$ tiene \textbf{distribución de
+		Poisson} con parámetro $\lambda > 0$ si su función de masa es
+	\[
+	p_X(k) = \frac{\lambda^k e^{-\lambda}}{k!},
+	\qquad k = 0, 1, 2, \ldots
+	\]
+	Se escribe $X \sim \mathrm{Poisson}(\lambda)$.
+\end{definicion}
+
+\begin{observacion}
+	La verificación de que $p_X$ es una función de masa válida es
+	inmediata a partir de la serie de Taylor de $e^x$:
+	\[
+	\sum_{k=0}^{\infty} \frac{\lambda^k e^{-\lambda}}{k!}
+	= e^{-\lambda} \sum_{k=0}^{\infty} \frac{\lambda^k}{k!}
+	= e^{-\lambda} \cdot e^{\lambda} = 1.
+	\]
+	La serie de Taylor $e^x = \sum_{k=0}^{\infty} x^k/k!$ es el
+	análogo continuo del teorema del binomio: así como la Binomial
+	se apoya en $(p+q)^n = 1$, la Poisson se apoya en
+	$e^{-\lambda}\cdot e^{\lambda} = 1$.
+\end{observacion}
+
+\begin{proposicion}{Momentos de la distribuci\'{o}n de Poisson}
+	{momentos_poisson}
+	Si $X \sim \mathrm{Poisson}(\lambda)$ con $\lambda > 0$, entonces
+	\[
+	E(X) = \lambda \qquad \text{y} \qquad \mathrm{Var}(X) = \lambda.
+	\]
+\end{proposicion}
+
+\begin{proof}
+	\textbf{Valor esperado.} El término $k=0$ no contribuye, luego:
+	\[
+	E(X)
+	= \sum_{k=1}^{\infty} k\,\frac{e^{-\lambda}\lambda^k}{k!}
+	= e^{-\lambda}\sum_{k=1}^{\infty} \frac{\lambda^k}{(k-1)!}.
+	\]
+	Sustituyendo $j = k-1$:
+	\[
+	= e^{-\lambda}\cdot\lambda \sum_{j=0}^{\infty}
+	\frac{\lambda^j}{j!}
+	= e^{-\lambda}\cdot\lambda\cdot e^{\lambda} = \lambda.
+	\]
+	
+	\textbf{Varianza.} Usamos $\mathrm{Var}(X) = E(X^2)-(E(X))^2$
+	y escribimos $E(X^2) = E(X(X-1)) + E(X)$. Para el primer término,
+	los casos $k=0$ y $k=1$ no contribuyen:
+	\[
+	E(X(X-1))
+	= \sum_{k=2}^{\infty} k(k-1)\,\frac{e^{-\lambda}\lambda^k}{k!}
+	= e^{-\lambda}\sum_{k=2}^{\infty}\frac{\lambda^k}{(k-2)!}.
+	\]
+	Sustituyendo $j = k-2$:
+	\[
+	= e^{-\lambda}\cdot\lambda^2\sum_{j=0}^{\infty}
+	\frac{\lambda^j}{j!}
+	= \lambda^2.
+	\]
+	Por lo tanto $E(X^2) = \lambda^2 + \lambda$, y:
+	\[
+	\mathrm{Var}(X) = (\lambda^2+\lambda) - \lambda^2
+	= \lambda. \qedhere
+	\]
+\end{proof}
+
+\begin{observacion}
+	La igualdad $E(X) = \mathrm{Var}(X) = \lambda$ es una propiedad
+	característica de la Poisson: si en datos de conteo se observa que
+	la media y la varianza muestral son aproximadamente iguales, la
+	Poisson es un modelo candidato razonable. El parámetro $\lambda$
+	tiene además una interpretación directa: es la tasa promedio de
+	ocurrencia en el intervalo de referencia. Si los eventos ocurren
+	a tasa $\lambda$ por hora, en un intervalo de $t$ horas se modela
+	con $\mathrm{Poisson}(\lambda t)$.
+\end{observacion}
+
+Vale la pena contrastar las tres distribuciones del tema. Bernoulli
+responde \emph{¿ocurrió el evento?} en un único ensayo. Binomial
+responde \emph{¿cuántas veces ocurrió?} en $n$ ensayos fijos. Poisson
+responde \emph{¿cuántos eventos ocurrieron?} en un intervalo continuo,
+sin $n$ fijo, solo con una tasa $\lambda$ estable. La regla práctica:
+si hay un $n$ contable y un $p$ identificable, Binomial; si los
+eventos se distribuyen continuamente en el tiempo o el espacio con
+tasa conocida, Poisson.
+
+\begin{figure}[H]
+	\centering
+	\begin{tikzpicture}[scale=0.90]
+		% Poisson(lambda=3) escalado por 10
+		% k=0:  0.0498  -> 0.498
+		% k=1:  0.1494  -> 1.494
+		% k=2:  0.2240  -> 2.240
+		% k=3:  0.2240  -> 2.240
+		% k=4:  0.1680  -> 1.680
+		% k=5:  0.1008  -> 1.008
+		% k=6:  0.0504  -> 0.504
+		% k=7:  0.0216  -> 0.216
+		% k=8:  0.0081  -> 0.081
+		% k=9:  0.0027  -> 0.027
+		
+		\def\bw{0.30}
+		
+		\draw[thick,->] (-0.5,0) -- (11.0,0) node[right] {$k$};
+		\draw[thick,->] (0,-0.1) -- (0,3.0) node[above] {$p_X(k)$};
+		
+		\draw[gray,thin,dashed] (0,2.240) -- (10.5,2.240);
+		\node[gray,left,font=\scriptsize] at (0,2.240) {$0.224$};
+		
+		\foreach \k/\h in {%
+			0/0.498, 1/1.494, 2/2.240, 3/2.240, 4/1.680,%
+			5/1.008, 6/0.504, 7/0.216, 8/0.081, 9/0.027}{
+			\pgfmathsetmacro{\xp}{\k+1}
+			\fill[verde!25] (\xp-\bw,0) rectangle (\xp+\bw,\h);
+			\draw[verde!80!black,thick] (\xp-\bw,0) rectangle
+			(\xp+\bw,\h);
+			\node[below,font=\scriptsize] at (\xp,0) {$\k$};
+		}
+		
+		\draw[rojo,thick,dashed] (4,0) -- (4,2.6);
+		\node[rojo,above,font=\small] at (4,2.6) {$\lambda=3$};
+		
+		\node[font=\small,gray] at (7.0,2.85)
+		{$X\sim\mathrm{Poisson}(3)$};
+	\end{tikzpicture}
+	\caption{Función de masa de $X\sim\mathrm{Poisson}(3)$. Media y
+		varianza son ambas iguales a $\lambda=3$. La moda se ubica en
+		$k=2$ y $k=3$ simultáneamente, ya que $\lambda$ no es entero más uno.}
+	\label{fig:pmf_poisson}
+\end{figure}
+
+\begin{observacion}
+	La distribución de Poisson es \textbf{discreta}: los valores que
+	toma $X$ son $0, 1, 2, \ldots$, que son contables. Lo que es
+	continuo no es la variable, sino el \emph{soporte} donde ocurren
+	los eventos --- el tiempo, el espacio, una superficie. La variable
+	cuenta cuántos eventos ocurrieron ahí, y ese conteo siempre es un
+	número entero. En el ejemplo de mensajes a un servidor: el número
+	de mensajes recibidos en una hora puede ser $0, 1, 2, 3, \ldots$
+	--- nunca $2.7$. Lo continuo es el intervalo de tiempo en que cada
+	mensaje puede llegar, no la cantidad de mensajes.
+\end{observacion}
 
 % ==========================================================
 \chapter{Variable aleatoria continua}
 
 \section{De lo discreto a lo continuo}
 
+
+En el Tema~2 modelamos fenómenos cuyos resultados son contables:
+número de éxitos, número de mensajes, número de fallas. La herramienta
+central fue la función de masa $p_X$, que asigna probabilidad a cada
+valor individual del recorrido. Pero hay fenómenos que no encajan en
+ese marco: el tiempo de espera en una cola, la temperatura de una
+ciudad, la altura de una persona. En estos casos el recorrido de $X$
+no es un conjunto contable --- es un intervalo continuo de la recta
+real, y la probabilidad de observar cualquier valor \emph{exacto} es
+cero.
+
+Para entender por qué, y cómo modelar estos fenómenos, conviene
+partir de algo familiar: el histograma.
+
+\subsection{Del histograma a la densidad}
+
+Supongamos que medimos una variable continua --- digamos, el tiempo
+de atención en ventanilla en segundos --- sobre una muestra de $n$
+observaciones. Dividimos el rango de los datos en $k$ intervalos
+$[a_0, a_1), [a_1, a_2), \ldots, [a_{k-1}, a_k)$ de ancho $\Delta x
+= a_{i+1} - a_i$, y construimos un histograma. La altura de cada
+barra puede definirse de dos maneras:
+
+\begin{itemize}[leftmargin=2em]
+	\item \textbf{Histograma de frecuencias:} la altura es el conteo
+	de observaciones en el intervalo. El área no tiene interpretación
+	probabilística directa.
+	\item \textbf{Histograma de densidad:} la altura $d_i$ se define
+	como la frecuencia relativa $fr_i$ dividida por el ancho del
+	intervalo:
+	\[
+	d_i = \frac{fr_i}{\Delta x}.
+	\]
+	De este modo, el \textbf{área} de cada barra es igual a la
+	frecuencia relativa:
+	\[
+	\text{área}_i = d_i \cdot \Delta x = fr_i,
+	\]
+	y la suma de todas las áreas es $1$. La probabilidad de que $X$
+	caiga en el intervalo $[a_{i-1}, a_i)$ se aproxima por el área
+	de la barra correspondiente.
+\end{itemize}
+
+El histograma de densidad es el punto de partida. Ahora preguntamos:
+¿qué ocurre si refinamos la partición indefinidamente, haciendo
+$\Delta x \to 0$?
+
+\subsection{El límite: de la suma a la integral}
+
+Con una partición de $k$ intervalos de ancho $\Delta x$, la
+probabilidad de que $X$ caiga en $[a, b]$ se aproxima por la suma
+de las áreas de las barras contenidas en ese intervalo:
+\[
+P(a \leq X \leq b) \approx \sum_{i} d_i \cdot \Delta x.
+\]
+Esta es una suma de Riemann. Al hacer $\Delta x \to 0$ --- es decir,
+al refinar la partición hasta tener intervalos infinitesimales ---
+las alturas $d_i$ convergen a una función continua $f(x)$ y la suma
+converge a una integral:
+\[
+P(a \leq X \leq b) = \lim_{\Delta x \to 0}
+\sum_{i} d_i \cdot \Delta x = \int_a^b f(x)\, dx.
+\]
+La función $f(x)$ que emerge en este límite es la
+\textbf{función de densidad de probabilidad} de $X$. Ya no
+asigna probabilidad a valores individuales --- asigna
+\emph{densidad de probabilidad} a cada punto, de modo que la
+probabilidad de un intervalo es el área bajo la curva $f$ en ese
+intervalo.
+
+\begin{observacion}
+	Una consecuencia inmediata e importante: para una variable
+	aleatoria continua,
+	\[
+	P(X = x) = \int_x^x f(t)\, dt = 0
+	\]
+	para todo $x \in \mathbb{R}$. La probabilidad de observar
+	cualquier valor \emph{exacto} es cero. Esto no significa que
+	el evento sea imposible --- significa que en un espacio continuo,
+	la probabilidad se concentra en intervalos, no en puntos. En
+	consecuencia, para una v.a.\ continua es irrelevante si los
+	extremos del intervalo están incluidos o no:
+	\[
+	P(a \leq X \leq b) = P(a < X \leq b) =
+	P(a \leq X < b) = P(a < X < b).
+	\]
+	Este resultado no tiene análogo en el mundo discreto y suele
+	sorprender la primera vez que se encuentra.
+\end{observacion}
+
+\begin{figure}[H]
+	\centering
+	\begin{tikzpicture}[scale=0.95]
+		
+		% ── Panel izquierdo: histograma grueso ──────────────────
+		\begin{scope}[shift={(0,0)}]
+			\node[font=\small\bfseries, azul] at (3.2, 4.6)
+			{Partici\'{o}n gruesa ($\Delta x$ grande)};
+			
+			\draw[thick,->] (-0.2,0) -- (5.5,0) node[right] {$x$};
+			\draw[thick,->] (0,-0.1) -- (0,4.2) node[above] {$d$};
+			
+			\foreach \x/\h in {0/0.8, 1/2.2, 2/3.6, 3/2.4, 4/0.9}{
+				\fill[azul!20] (\x,0) rectangle (\x+1,\h);
+				\draw[azul,thick] (\x,0) rectangle (\x+1,\h);
+			}
+			\node[below, font=\scriptsize] at (0,0) {$a$};
+			\node[below, font=\scriptsize] at (5,0) {$b$};
+		\end{scope}
+		
+		% Flecha central
+		\draw[->, very thick, azul!60] (5.9, 2.0) -- (7.1, 2.0)
+		node[midway, above, font=\scriptsize] {$\Delta x \to 0$};
+		
+		% ── Panel derecho: curva límite ─────────────────────────
+		\begin{scope}[shift={(7.5,0)}]
+			\node[font=\small\bfseries, azul] at (3.0, 4.3)
+			{L\'{i}mite ($\Delta x \to 0$)};
+			
+			\draw[thick,->] (-0.2,0) -- (5.5,0) node[right] {$x$};
+			\draw[thick,->] (0,-0.1) -- (0,4.2) node[above] {$f(x)$};
+			
+			\fill[azul!15] (0,0)
+			.. controls (0.5,0.3) and (1.0,1.8) .. (2.0,3.6)
+			.. controls (3.0,1.8) and (4.0,0.4) .. (5.0,0.05)
+			-- (5,0) -- (0,0);
+			\draw[azul, very thick] (0,0)
+			.. controls (0.5,0.3) and (1.0,1.8) .. (2.0,3.6)
+			.. controls (3.0,1.8) and (4.0,0.4) .. (5.0,0.05);
+			
+			% Etiqueta del área — posicionada debajo de la curva
+			\node[azul!70!black, font=\small] at (2.5, 0.55)
+			{$\displaystyle\int_a^b f(x)\,dx = 1$};
+			
+			\node[below, font=\scriptsize] at (0,0) {$a$};
+			\node[below, font=\scriptsize] at (5,0) {$b$};
+		\end{scope}
+		
+	\end{tikzpicture}
+	\caption{Al refinar la partici\'{o}n del histograma de densidad
+		($\Delta x \to 0$), las alturas de las barras convergen a una
+		funci\'{o}n continua $f(x)$. La probabilidad de un intervalo pasa
+		de ser una suma de \'{a}reas de barras a ser el \'{a}rea bajo la curva.}
+	\label{fig:histograma_densidad}
+\end{figure}
+
+\begin{definicion}{Variable aleatoria continua}{va_continua}
+	Una variable aleatoria $X$ es \textbf{continua} si existe una
+	función $f: \mathbb{R} \to [0, \infty)$ tal que para todo
+	intervalo $[a, b]$:
+	\[
+	P(a \leq X \leq b) = \int_a^b f(x)\, dx.
+	\]
+\end{definicion}
+
 \section{Funci\'{o}n de densidad de probabilidad}
+
+El argumento del histograma nos dejó con una función $f(x)$ tal que
+la probabilidad de un intervalo es el área bajo $f$ en ese intervalo.
+Ahora formalizamos qué condiciones debe satisfacer $f$ para ser una
+función de densidad válida --- el análogo continuo de los axiomas de
+la función de masa.
+
+\begin{definicion}{Funci\'{o}n de densidad de probabilidad}{fdp}
+	Sea $X$ una variable aleatoria continua. Una función
+	$f: \mathbb{R} \to \mathbb{R}$ es una \textbf{función de densidad
+		de probabilidad} (fdp) de $X$ si satisface:
+	\begin{enumerate}[label=\textbf{\roman*)}]
+		\item $f(x) \geq 0$ para todo $x \in \mathbb{R}$.
+		\item $\displaystyle\int_{-\infty}^{\infty} f(x)\,dx = 1$.
+		\item Para todo $a \leq b$:
+		\[
+		P(a \leq X \leq b) = \int_a^b f(x)\,dx.
+		\]
+	\end{enumerate}
+\end{definicion}
+
+\begin{observacion}
+	El paralelo con la función de masa discreta es exacto: la condición
+	\textbf{i} es la no negatividad ($p_X(x) \geq 0$), la condición
+	\textbf{ii} es la normalización ($\sum_x p_X(x) = 1$), y la
+	condición \textbf{iii} es el cálculo de probabilidades (suma
+	$\to$ integral). La única diferencia estructural es que la suma
+	se reemplaza por la integral en todo lugar.
+	
+	Nótese además que $f(x)$ \textbf{no es una probabilidad} ---
+	es una \emph{densidad}. Puede tomar valores mayores que $1$; lo
+	que debe ser menor o igual a $1$ es el área bajo $f$ en cualquier
+	intervalo, no el valor de $f$ en un punto.
+\end{observacion}
 
 \section{Funci\'{o}n de distribuci\'{o}n acumulada}
 
+\begin{definicion}{Funci\'{o}n de distribuci\'{o}n acumulada
+		(continua)}{fda_continua}
+	Sea $X$ una variable aleatoria continua con fdp $f$. La
+	\textbf{función de distribución acumulada} de $X$ es
+	\[
+	F(x) = P(X \leq x) = \int_{-\infty}^{x} f(t)\,dt,
+	\qquad x \in \mathbb{R}.
+	\]
+\end{definicion}
+
+\begin{proposicion}{Propiedades de la FDA continua}{props_fda_continua}
+	Sea $X$ una variable aleatoria continua con fdp $f$ y FDA $F$.
+	Entonces:
+	\begin{enumerate}[label=\textbf{\roman*)}]
+		\item $F$ es no decreciente: si $x_1 < x_2$ entonces
+		$F(x_1) \leq F(x_2)$.
+		\item $\lim_{x \to -\infty} F(x) = 0$.
+		\item $\lim_{x \to \infty} F(x) = 1$.
+		\item Para todo $a \leq b$:
+		$P(a \leq X \leq b) = F(b) - F(a)$.
+	\end{enumerate}
+\end{proposicion}
+
+\begin{proof}
+	\textbf{i)} Si $x_1 < x_2$, entonces
+	\[
+	F(x_2) - F(x_1)
+	= \int_{-\infty}^{x_2} f(t)\,dt -
+	\int_{-\infty}^{x_1} f(t)\,dt
+	= \int_{x_1}^{x_2} f(t)\,dt \geq 0,
+	\]
+	donde la última desigualdad se sigue de que $f(t) \geq 0$
+	para todo $t$ (condición \textbf{i} de la
+	Definición~\ref{def:fdp}).
+	
+	\medskip
+	\textbf{ii)} Por la condición \textbf{ii} de la
+	Definición~\ref{def:fdp}, $\int_{-\infty}^{\infty} f(t)\,dt = 1$,
+	lo que implica en particular que $f$ es integrable en
+	$\mathbb{R}$. Para una función integrable, la integral sobre
+	un intervalo $(-\infty, x]$ tiende a $0$ cuando $x \to -\infty$:
+	\[
+	\lim_{x \to -\infty} F(x)
+	= \lim_{x \to -\infty} \int_{-\infty}^{x} f(t)\,dt = 0.
+	\]
+	
+	\medskip
+	\textbf{iii)} Directamente de la condición \textbf{ii} de la
+	Definición~\ref{def:fdp}:
+	\[
+	\lim_{x \to \infty} F(x)
+	= \lim_{x \to \infty} \int_{-\infty}^{x} f(t)\,dt
+	= \int_{-\infty}^{\infty} f(t)\,dt = 1.
+	\]
+	
+	\medskip
+	\textbf{iv)} Por aditividad de la integral:
+	\[
+	\int_{-\infty}^{b} f(t)\,dt
+	= \int_{-\infty}^{a} f(t)\,dt + \int_{a}^{b} f(t)\,dt,
+	\]
+	de modo que
+	\[
+	P(a \leq X \leq b)
+	= \int_a^b f(t)\,dt
+	= F(b) - F(a). \qedhere
+	\]
+\end{proof}
+
+La diferencia central con el caso discreto es que ahora $F$ es
+continua y diferenciable, lo que permite recuperar la densidad a
+partir de la FDA vía el Teorema Fundamental del Cálculo.
+
+\begin{proposicion}{Relaci\'{o}n entre $F$ y $f$}{fda_fdp}
+	Sea $X$ una variable aleatoria continua con fdp $f$ y FDA $F$.
+	En todo punto donde $f$ es continua,
+	\[
+	F'(x) = f(x).
+	\]
+\end{proposicion}
+
+\begin{proposicion}{Relaci\'{o}n entre $F$ y $f$}{fda_fdp}
+	Sea $X$ una variable aleatoria continua con fdp $f$ y FDA $F$.
+	En todo punto donde $f$ es continua,
+	\[
+	F'(x) = f(x).
+	\]
+\end{proposicion}
+
+\begin{proof}
+	Recordamos primero el \textbf{Teorema Fundamental del C\'{a}lculo}
+	(TFC): si $g$ es una función continua en $[a,b]$ y se define
+	\[
+	G(x) = \int_a^x g(t)\,dt, \qquad x \in [a,b],
+	\]
+	entonces $G$ es diferenciable en $(a,b)$ y $G'(x) = g(x)$.
+	Es decir, la derivada de una integral con límite superior
+	variable recupera el integrando evaluado en ese límite.
+	
+	Aplicamos este resultado a nuestra situación. Por definición,
+	\[
+	F(x) = \int_{-\infty}^{x} f(t)\,dt.
+	\]
+	En todo punto donde $f$ es continua, el TFC garantiza que $F$
+	es diferenciable y que
+	\[
+	F'(x) = f(x). \qedhere
+	\]
+\end{proof}
+
+\begin{observacion}
+	Esta proposición tiene una consecuencia práctica importante:
+	si conocemos la FDA $F$, podemos recuperar la fdp simplemente
+	derivando. Y recíprocamente, si conocemos la fdp $f$, podemos
+	obtener la FDA integrando. Las dos funciones contienen la misma
+	información sobre $X$ --- solo difieren en la forma de
+	presentarla.
+\end{observacion}
+
+
+Esta proposición es la razón por la que $f$ se llama
+\emph{densidad}: así como la densidad física de un objeto es la
+derivada de su masa acumulada respecto a la posición, la fdp es
+la derivada de la probabilidad acumulada respecto a $x$. La FDA
+acumula; la fdp describe cómo se distribuye esa acumulación.
+
+
+\section{Valor esperado y varianza}
+
+Los conceptos de valor esperado y varianza se trasladan al caso
+continuo reemplazando la suma por la integral --- la misma sustitución
+que hicimos en la fdp.
+
+En el caso discreto, el valor esperado era una suma ponderada
+$\sum_x x\, p_X(x)$: cada valor posible se pesa por su
+probabilidad. En el caso continuo, la probabilidad de que $X$
+tome valores en un entorno infinitesimal de $x$ es $f(x)\,dx$,
+de modo que la suma se convierte naturalmente en una integral.
+La definición es la única extensión consistente del caso discreto.
+
+\begin{definicion}{Valor esperado continuo}{ev_continuo}
+	Sea $X$ una variable aleatoria continua con fdp $f$. El
+	\textbf{valor esperado} de $X$ es
+	\[
+	E(X) = \int_{-\infty}^{\infty} x\, f(x)\,dx,
+	\]
+	siempre que la integral converja absolutamente.
+\end{definicion}
+
+De manera análoga, la varianza se extiende al caso continuo
+reemplazando la suma por la integral. La interpretación es
+idéntica a la del caso discreto: mide la dispersión promedio
+de $X$ alrededor de su media, ponderada ahora por la densidad
+en lugar de por la función de masa.
+
+\begin{definicion}{Varianza continua}{var_continua}
+	Sea $X$ una variable aleatoria continua con fdp $f$ y
+	$\mu = E(X)$. La \textbf{varianza} de $X$ es
+	\[
+	\mathrm{Var}(X) = E\!\left[(X-\mu)^2\right]
+	= \int_{-\infty}^{\infty} (x-\mu)^2\, f(x)\,dx,
+	\]
+	y la \textbf{desviación estándar} es
+	$\sigma_X = \sqrt{\mathrm{Var}(X)}$.
+\end{definicion}
+
+\begin{observacion}
+	La fórmula alternativa $\mathrm{Var}(X) = E(X^2) - (E(X))^2$
+	se mantiene válida en el caso continuo, con la misma demostración
+	algebraica que en el caso discreto
+	(Proposición~\ref{prop:var_alt}). Las propiedades de
+	linealidad del valor esperado y las propiedades de la varianza
+	también se transfieren sin cambio.
+\end{observacion}
+
+\section{Distribuci\'{o}n Uniforme continua}
+
+La distribución uniforme continua modela una variable aleatoria
+que puede tomar cualquier valor en un intervalo $[a,b]$ con la
+misma probabilidad relativa. Esto impone una exigencia concreta
+sobre la fdp: debe ser \textbf{constante} en $[a,b]$, es decir
+$f(x) = c$ para alguna constante $c > 0$, y cero fuera del
+intervalo. La condición de normalización determina $c$
+unívocamente:
+\[
+\int_{-\infty}^{\infty} f(x)\,dx
+= \int_a^b c\,dx = c(b-a) = 1
+\implies c = \frac{1}{b-a}.
+\]
+La fdp queda así completamente determinada por la sola exigencia
+de equiprobabilidad.
+
+\begin{definicion}{Distribuci\'{o}n Uniforme continua}{dist_uniforme}
+	Una variable aleatoria $X$ tiene \textbf{distribución uniforme
+		continua} en el intervalo $[a,b]$, con $a < b$, si su función
+	de densidad de probabilidad es
+	\[
+	f(x) = \begin{cases}
+		\dfrac{1}{b-a} & \text{si } a \leq x \leq b, \\[6pt]
+		0              & \text{en otro caso.}
+	\end{cases}
+	\]
+	Se escribe $X \sim U(a,b)$.
+\end{definicion}
+
+\begin{proposicion}{FDA, valor esperado y varianza de la Uniforme}
+	{momentos_uniforme}
+	Si $X \sim U(a,b)$, entonces:
+	
+	\medskip
+	\noindent\textbf{i)} La función de distribución acumulada es
+	\[
+	F(x) = \begin{cases}
+		0                      & \text{si } x < a,        \\[4pt]
+		\dfrac{x-a}{b-a}       & \text{si } a \leq x < b, \\[6pt]
+		1                      & \text{si } x \geq b.
+	\end{cases}
+	\]
+	
+	\medskip
+	\noindent\textbf{ii)} $E(X) = \dfrac{a+b}{2}$.
+	
+	\medskip
+	\noindent\textbf{iii)} $\mathrm{Var}(X) = \dfrac{(b-a)^2}{12}$.
+\end{proposicion}
+
+\begin{proof}
+	\textbf{i)} Para $x < a$: $F(x) = \int_{-\infty}^x 0\,dt = 0$.
+	
+	Para $a \leq x < b$:
+	\[
+	F(x) = \int_{-\infty}^{x} f(t)\,dt
+	= \int_a^x \frac{1}{b-a}\,dt
+	= \frac{x-a}{b-a}.
+	\]
+	
+	Para $x \geq b$: $F(x) = \int_{-\infty}^{\infty} f(t)\,dt = 1$.
+	
+	\medskip
+	\textbf{ii)} Aplicando la definición de valor esperado continuo:
+	\[
+	E(X) = \int_{-\infty}^{\infty} x\,f(x)\,dx
+	= \int_a^b \frac{x}{b-a}\,dx
+	= \frac{1}{b-a} \cdot \frac{x^2}{2}\Bigg|_a^b
+	= \frac{b^2 - a^2}{2(b-a)}
+	= \frac{(b+a)(b-a)}{2(b-a)}
+	= \frac{a+b}{2}.
+	\]
+	
+	\medskip
+	\textbf{iii)} Usamos la fórmula alternativa
+	$\mathrm{Var}(X) = E(X^2) - (E(X))^2$. Calculamos $E(X^2)$:
+	\[
+	E(X^2) = \int_a^b \frac{x^2}{b-a}\,dx
+	= \frac{1}{b-a} \cdot \frac{x^3}{3}\Bigg|_a^b
+	= \frac{b^3 - a^3}{3(b-a)}
+	= \frac{(b^2+ab+a^2)(b-a)}{3(b-a)}
+	= \frac{a^2+ab+b^2}{3}.
+	\]
+	Por lo tanto:
+	\[
+	\mathrm{Var}(X)
+	= \frac{a^2+ab+b^2}{3} - \left(\frac{a+b}{2}\right)^2
+	= \frac{a^2+ab+b^2}{3} - \frac{a^2+2ab+b^2}{4}.
+	\]
+Llevando a denominador com\'{u}n $12$:
+\begin{align*}
+	\mathrm{Var}(X)
+	&= \frac{4(a^2+ab+b^2) - 3(a^2+2ab+b^2)}{12} \\[6pt]
+	&= \frac{4a^2+4ab+4b^2-3a^2-6ab-3b^2}{12} \\[6pt]
+	&= \frac{a^2-2ab+b^2}{12} \\[6pt]
+	&= \frac{(b-a)^2}{12}. \qedhere
+\end{align*}
+\end{proof}
+
+\begin{observacion}
+	El valor esperado $E(X) = (a+b)/2$ es el punto medio del
+	intervalo --- exactamente lo que la intuición sugiere para una
+	distribución completamente simétrica. La varianza
+	$(b-a)^2/12$ crece con el cuadrado del largo del intervalo:
+	mientras más amplio es $[a,b]$, más dispersa es $X$.
+\end{observacion}
+
+\begin{figure}[H]
+	\centering
+	\begin{tikzpicture}[scale=0.95]
+		
+		% ── Panel izquierdo: fdp ────────────────────────────────
+		\begin{scope}[shift={(0,0)}]
+			\node[font=\small\bfseries, azul] at (3.0, 3.0)
+			{Funci\'{o}n de densidad $f(x)$};
+			
+			\draw[thick,->] (-0.5,0) -- (6.0,0) node[right] {$x$};
+			\draw[thick,->] (0,-0.2) -- (0,2.8) node[above] {};
+			
+			% Rectángulo de la fdp
+			\fill[azul!20] (1.5,0) rectangle (4.5,2.0);
+			\draw[azul,thick] (1.5,0) -- (1.5,2.0) -- (4.5,2.0)
+			-- (4.5,0);
+			\draw[azul,thick] (-0.5,0) -- (1.5,0);
+			\draw[azul,thick] (4.5,0) -- (6.0,0);
+			
+			% Etiqueta altura
+			\draw[gray,dashed,thin] (0,2.0) -- (1.5,2.0);
+			\node[left, font=\small] at (0,2.0)
+			{$\frac{1}{b-a}$};
+			
+			% Etiquetas eje x
+			\node[below, font=\small] at (1.5,0) {$a$};
+			\node[below, font=\small] at (4.5,0) {$b$};
+			
+			% Media
+			\draw[rojo,dashed,thick] (3.0,0) -- (3.0,2.0);
+			\node[rojo,below,font=\small] at (3.0,0)
+			{$\frac{a+b}{2}$};
+		\end{scope}
+		
+		% ── Panel derecho: FDA ──────────────────────────────────
+		\begin{scope}[shift={(7.5,0)}]
+			\node[font=\small\bfseries, azul] at (3.0, 3.0)
+			{FDA $F(x)$};
+			
+			\draw[thick,->] (-0.5,0) -- (6.0,0) node[right] {$x$};
+			\draw[thick,->] (0,-0.2) -- (0,2.8) node[above] {};
+			
+			% F(x) = 0 para x < a
+			\draw[azul,thick] (-0.5,0) -- (1.5,0);
+			
+			% F(x) = (x-a)/(b-a) rampa lineal
+			\fill[azul!20] (1.5,0) -- (4.5,2.0) -- (4.5,0) -- cycle;
+			\draw[azul,thick] (1.5,0) -- (4.5,2.0);
+			
+			% F(x) = 1 para x >= b
+			\draw[azul,thick] (4.5,2.0) -- (6.0,2.0);
+			
+			% Marca en y=1
+			\draw[gray,dashed,thin] (0,2.0) -- (4.5,2.0);
+			\node[left,font=\small] at (0,2.0) {$1$};
+			
+			% Etiquetas eje x
+			\node[below,font=\small] at (1.5,0) {$a$};
+			\node[below,font=\small] at (4.5,0) {$b$};
+		\end{scope}
+		
+	\end{tikzpicture}
+	\caption{Función de densidad y FDA de $X \sim U(a,b)$. La fdp es
+		un rectángulo de altura $1/(b-a)$ y la FDA es una rampa lineal
+		entre $a$ y $b$. La línea roja marca la media $E(X) = (a+b)/2$.}
+	\label{fig:uniforme_continua}
+\end{figure}
+
+\section{Distribuci\'{o}n Exponencial}
+
+En la distribución de Poisson modelamos el número de eventos
+que ocurren en un intervalo de tiempo fijo, asumiendo una tasa
+promedio $\lambda$ constante. Pero hay una pregunta dual que
+Poisson no responde directamente: ¿cuánto tiempo transcurre
+entre un evento y el siguiente? La distribución exponencial
+es la respuesta --- y no por coincidencia usa el mismo parámetro
+$\lambda$.
+
+\subsubsection{Derivaci\'{o}n de la fdp}
+
+Sea $X$ el tiempo de espera hasta el próximo evento en un proceso
+de Poisson con tasa $\lambda$. Queremos encontrar la distribución
+de $X$. El punto de partida es calcular $P(X > x)$ --- la
+probabilidad de que el próximo evento ocurra \emph{después} de
+$x$ unidades de tiempo.
+
+El evento $\{X > x\}$ es equivalente a que no ocurra ningún
+evento en el intervalo $[0, x]$. Si $Y$ denota el número de
+eventos en $[0,x]$, entonces $Y \sim \mathrm{Poisson}(\lambda x)$
+--- la tasa es $\lambda$ por unidad de tiempo, luego en $x$
+unidades la tasa es $\lambda x$. Por lo tanto:
+\[
+P(X > x) = P(Y = 0)
+= \frac{(\lambda x)^0 e^{-\lambda x}}{0!}
+= e^{-\lambda x}.
+\]
+De aquí obtenemos la FDA de $X$ directamente:
+\[
+F(x) = P(X \leq x) = 1 - P(X > x) = 1 - e^{-\lambda x},
+\qquad x \geq 0.
+\]
+Aplicando la Proposición~\ref{prop:fda_fdp}, la fdp se obtiene
+derivando la FDA:
+\[
+f(x) = F'(x) = \lambda e^{-\lambda x}, \qquad x > 0.
+\]
+La fdp no emerge de una postulación arbitraria --- es la
+consecuencia directa de la estructura del proceso de Poisson
+subyacente.
+
+\begin{definicion}{Distribuci\'{o}n Exponencial}{dist_exponencial}
+	Una variable aleatoria continua $X$ tiene
+	\textbf{distribución exponencial} con parámetro $\lambda > 0$
+	si su función de densidad de probabilidad es
+	\[
+	f(x) = \begin{cases}
+		\lambda e^{-\lambda x} & \text{si } x > 0, \\
+		0                      & \text{en otro caso.}
+	\end{cases}
+	\]
+	Se escribe $X \sim \mathrm{Exp}(\lambda)$.
+\end{definicion}
+
+\begin{observacion}
+	La verificación de que $f$ es una fdp válida es inmediata:
+	$f(x) \geq 0$ para todo $x$, y
+	\[
+	\int_{-\infty}^{\infty} f(x)\,dx
+	= \int_0^{\infty} \lambda e^{-\lambda x}\,dx
+	= \lambda \cdot \left[-\frac{1}{\lambda}e^{-\lambda x}
+	\right]_0^{\infty}
+	= \left[-e^{-\lambda x}\right]_0^{\infty}
+	= 0 - (-1) = 1.
+	\]
+\end{observacion}
+
+\begin{proposicion}{FDA, valor esperado y varianza de la
+		Exponencial}{momentos_exp}
+	Si $X \sim \mathrm{Exp}(\lambda)$ con $\lambda > 0$, entonces:
+	
+	\medskip
+	\noindent\textbf{i)} La función de distribución acumulada es
+	\[
+	F(x) = \begin{cases}
+		0                    & \text{si } x < 0,    \\[4pt]
+		1 - e^{-\lambda x}   & \text{si } x \geq 0.
+	\end{cases}
+	\]
+	
+	\medskip
+	\noindent\textbf{ii)} $E(X) = \dfrac{1}{\lambda}$.
+	
+	\medskip
+	\noindent\textbf{iii)} $\mathrm{Var}(X) = \dfrac{1}{\lambda^2}$.
+\end{proposicion}
+
+\begin{proof}
+	\textbf{i)} Ya fue derivada en la sección anterior.
+	
+	\medskip
+	\textbf{ii)} Aplicamos la definición de valor esperado:
+	\[
+	E(X) = \int_0^{\infty} x \cdot \lambda e^{-\lambda x}\,dx
+	= \lambda \int_0^{\infty} x e^{-\lambda x}\,dx.
+	\]
+	Integramos por partes con $u = x$, $dv = e^{-\lambda x}\,dx$,
+	luego $du = dx$, $v = -\frac{1}{\lambda}e^{-\lambda x}$:
+	\[
+	\int_0^{\infty} x e^{-\lambda x}\,dx
+	= \left[-\frac{x}{\lambda}e^{-\lambda x}\right]_0^{\infty}
+	+ \int_0^{\infty} \frac{1}{\lambda}e^{-\lambda x}\,dx.
+	\]
+	El primer término se anula en ambos extremos: en $x = 0$ da
+	$0$, y cuando $x \to \infty$, $xe^{-\lambda x} \to 0$ porque
+	la exponencial domina al polinomio. El segundo término:
+	\[
+	\int_0^{\infty} \frac{1}{\lambda}e^{-\lambda x}\,dx
+	= \frac{1}{\lambda}\left[-\frac{1}{\lambda}
+	e^{-\lambda x}\right]_0^{\infty}
+	= \frac{1}{\lambda^2}.
+	\]
+	Por lo tanto:
+	\[
+	E(X) = \lambda \cdot \frac{1}{\lambda^2} = \frac{1}{\lambda}.
+	\]
+	
+	\medskip
+	\textbf{iii)} Usamos la fórmula alternativa
+	$\mathrm{Var}(X) = E(X^2) - (E(X))^2$. Calculamos $E(X^2)$
+	integrando por partes dos veces con $u = x^2$,
+	$dv = e^{-\lambda x}\,dx$:
+	\[
+	E(X^2) = \lambda\int_0^{\infty} x^2 e^{-\lambda x}\,dx
+	= \lambda\left(
+	\left[-\frac{x^2}{\lambda}e^{-\lambda x}
+	\right]_0^{\infty}
+	+ \frac{2}{\lambda}\int_0^{\infty}
+	x e^{-\lambda x}\,dx\right).
+	\]
+	El término evaluado se anula por el mismo argumento que antes.
+	El integral restante ya lo calculamos en \textbf{ii)}:
+	$\int_0^{\infty} x e^{-\lambda x}\,dx = 1/\lambda^2$. Entonces:
+	\[
+	E(X^2) = \lambda \cdot \frac{2}{\lambda} \cdot
+	\frac{1}{\lambda^2} = \frac{2}{\lambda^2}.
+	\]
+	Por lo tanto:
+	\[
+	\mathrm{Var}(X) = \frac{2}{\lambda^2} -
+	\left(\frac{1}{\lambda}\right)^2
+	= \frac{2}{\lambda^2} - \frac{1}{\lambda^2}
+	= \frac{1}{\lambda^2}. \qedhere
+	\]
+\end{proof}
+
+\begin{observacion}
+	El valor esperado $E(X) = 1/\lambda$ tiene una interpretación
+	directa: si los eventos ocurren a tasa $\lambda$ por unidad de
+	tiempo, el tiempo promedio de espera entre eventos es
+	$1/\lambda$. Esto cierra la conexión con Poisson: si
+	$\lambda = 5$ eventos por hora, el tiempo promedio entre
+	eventos es $1/5$ de hora, es decir, 12 minutos.
+\end{observacion}
+
+La distribución exponencial tiene una propiedad que la hace única
+entre las distribuciones continuas y que resulta fundamental en
+aplicaciones de confiabilidad y teoría de colas.
+
+\begin{proposicion}{Propiedad de falta de memoria}
+	{falta_memoria}
+	Si $X \sim \mathrm{Exp}(\lambda)$, entonces para todo
+	$s, t > 0$:
+	\[
+	P(X > s + t \mid X > s) = P(X > t).
+	\]
+\end{proposicion}
+
+\begin{proof}
+	Aplicando la definición de probabilidad condicional y usando
+	que $P(X > x) = e^{-\lambda x}$:
+	\[
+	P(X > s+t \mid X > s)
+	= \frac{P(X > s+t,\; X > s)}{P(X > s)}
+	= \frac{P(X > s+t)}{P(X > s)}
+	= \frac{e^{-\lambda(s+t)}}{e^{-\lambda s}}
+	= e^{-\lambda t}
+	= P(X > t). \qedhere
+	\]
+\end{proof}
+
+\begin{observacion}
+	La propiedad de falta de memoria dice que el tiempo de espera
+	restante no depende del tiempo ya esperado. Si $X$ es la vida
+	útil de un componente y el componente ha sobrevivido $s$ horas,
+	la probabilidad de que sobreviva $t$ horas más es exactamente
+	la misma que si fuera nuevo. El componente no \emph{recuerda}
+	cuánto tiempo lleva funcionando --- no se desgasta en sentido
+	probabilístico. Esta propiedad caracteriza a la distribución
+	exponencial: es la \textbf{única} distribución continua con
+	falta de memoria.
+\end{observacion}
+
+\begin{figure}[H]
+	\centering
+	\begin{tikzpicture}[scale=0.95]
+		
+		% ── Panel izquierdo: fdp ────────────────────────────────
+		\begin{scope}[shift={(0,0)}]
+			\node[font=\small\bfseries, azul] at (3.0, 3.8)
+			{Funci\'{o}n de densidad $f(x)$};
+			
+			\draw[thick,->] (-0.3,0) -- (6.2,0) node[right] {$x$};
+			\draw[thick,->] (0,-0.2) -- (0,3.6) node[above] {};
+			
+		% lambda = 0.5
+		\draw[azul!50, thick, domain=0:6, samples=100]
+		plot (\x, {1.5*0.5*exp(-0.5*\x)});
+		\node[azul!60, font=\scriptsize] at (4.5, 0.6)
+		{$\lambda = 0.5$};
+		
+		% lambda = 1
+		\draw[azul, thick, domain=0:6, samples=100]
+		plot (\x, {1.5*1*exp(-1*\x)});
+		\node[azul, font=\scriptsize] at (2.5, 0.9)
+		{$\lambda = 1$};
+		
+		% lambda = 2
+		\draw[azul!80!black, very thick, domain=0:6, samples=100]
+		plot (\x, {1.5*2*exp(-2*\x)});
+		\node[azul!80!black, font=\scriptsize] at (1.2, 1.8)
+		{$\lambda = 2$};
+		
+		% Puntos en x=0
+		\foreach \lam/\col in {0.5/azul!50, 1/azul,
+			2/azul!80!black}{
+			\fill[\col] (0, {1.5*\lam}) circle (2pt);
+		}
+		\end{scope}
+		
+		% ── Panel derecho: FDA ──────────────────────────────────
+		\begin{scope}[shift={(7.5,0)}]
+			\node[font=\small\bfseries, azul] at (3.0, 3.8)
+			{FDA $F(x)$};
+			
+			\draw[thick,->] (-0.3,0) -- (6.2,0) node[right] {$x$};
+			\draw[thick,->] (0,-0.2) -- (0,3.6) node[above] {};
+			
+			% Línea y=3 (representa F=1)
+			\draw[gray, thin, dashed] (0,3.0) -- (6.0,3.0);
+			\node[gray, left, font=\scriptsize] at (0,3.0) {$1$};
+			
+			% lambda = 0.5
+			\draw[azul!50, thick, domain=0:6, samples=100]
+			plot (\x, {3*(1-exp(-0.5*\x))});
+			\node[azul!60, font=\scriptsize] at (5.0, 1.8)
+			{$\lambda = 0.5$};
+			
+			% lambda = 1
+			\draw[azul, thick, domain=0:6, samples=100]
+			plot (\x, {3*(1-exp(-1*\x))});
+			\node[azul, font=\scriptsize] at (3.5, 2.4)
+			{$\lambda = 1$};
+			
+			% lambda = 2
+			\draw[azul!80!black, very thick, domain=0:6, samples=100]
+			plot (\x, {3*(1-exp(-2*\x))});
+			\node[azul!80!black, font=\scriptsize] at (2.0, 2.8)
+			{$\lambda = 2$};
+			
+			% F(x) = 0 para x < 0
+			\draw[azul, thick] (-0.3,0) -- (0,0);
+		\end{scope}
+		
+	\end{tikzpicture}
+	\caption{Función de densidad y FDA de $X \sim \mathrm{Exp}(\lambda)$
+		para distintos valores de $\lambda$. A mayor $\lambda$, la densidad
+		cae más rápidamente y la FDA satura antes --- el tiempo de espera
+		promedio $1/\lambda$ es menor.}
+	\label{fig:exponencial}
+\end{figure}
+
 \section{Distribuci\'{o}n Normal}
+
+La distribución Normal es la más importante de toda la
+estadística. Aparece en fenómenos tan distintos como las alturas
+de una población, los errores de medición en un experimento
+físico, o las fluctuaciones de precios en un mercado financiero.
+Su ubicuidad no es accidental --- tiene una justificación
+matemática profunda que exploraremos en la subsección siguiente.
+Por ahora la introducimos formalmente.
+
+\begin{definicion}{Distribuci\'{o}n Normal}{dist_normal}
+	Una variable aleatoria continua $X$ tiene
+	\textbf{distribución Normal} con parámetros $\mu \in \mathbb{R}$
+	y $\sigma^2 > 0$ si su función de densidad de probabilidad es
+	\[
+	f(x) = \frac{1}{\sqrt{2\pi}\,\sigma}
+	\exp\!\left(-\frac{(x-\mu)^2}{2\sigma^2}\right),
+	\qquad x \in \mathbb{R}.
+	\]
+Se escribe $X \sim N(\mu, \sigma^2)$.
+\end{definicion}
+
+\begin{figure}[H]
+	\centering
+	\begin{tikzpicture}[scale=1.0]
+		
+		\draw[thick,->] (-4.5,0) -- (4.5,0) node[right] {$x$};
+		\draw[thick,->] (0,-0.2) -- (0,4.2) node[above] {$f(x)$};
+		
+		% Curva Normal(0,1) escalada -- 1/sqrt(2pi) = 0.3989
+		\fill[azul!15, domain=-4:4, samples=200]
+		plot (\x, {3.5*0.3989*exp(-\x*\x/2)})
+		-- (4,0) -- (-4,0) -- cycle;
+		\draw[azul, very thick, domain=-4:4, samples=200]
+		plot (\x, {3.5*0.3989*exp(-\x*\x/2)});
+		
+	    % Línea en la media
+	\draw[rojo, dashed, thick] (0,0) -- (0, {3.5*0.3989});
+	\node[rojo, right, font=\small] at (0.2, {3.5*0.3989+0.4})
+	{$\dfrac{1}{\sqrt{2\pi}\,\sigma}$};
+	\draw[rojo, ->] (0.2, {3.5*0.3989+0.35})
+	-- (0.05, {3.5*0.3989+0.05});
+		
+		% Marcas en mu +/- sigma
+		\draw[verde!70!black, dashed, thick]
+		(1.0,0) -- (1.0, {3.5*0.3989*exp(-0.5)});
+		\draw[verde!70!black, dashed, thick]
+		(-1.0,0) -- (-1.0, {3.5*0.3989*exp(-0.5)});
+		\node[verde!70!black, below, font=\small] at (1.0,0)
+		{$\mu+\sigma$};
+		\node[verde!70!black, below, font=\small] at (-1.0,0)
+		{$\mu-\sigma$};
+		
+	    % Simetría — nota lateral en lugar de flecha
+	    \node[gray, font=\small, align=center] at (3.5, 3.2)
+	    {sim\'{e}trica\\respecto a $\mu$};
+	    \draw[->, gray, thin] (3.5, 2.9) -- (0.3, 2.1);
+		
+	\end{tikzpicture}
+	\caption{Funci\'{o}n de densidad de $X \sim N(\mu, \sigma^2)$. La
+		curva es sim\'{e}trica respecto a $\mu$, alcanza su m\'{a}ximo en
+		$x = \mu$ con altura $1/(\sqrt{2\pi}\,\sigma)$, y tiene puntos
+		de inflexi\'{o}n en $\mu \pm \sigma$.}
+	\label{fig:normal_intro}
+\end{figure}
+
+\begin{observacion}
+	La fdp Normal tiene tres propiedades geométricas que se
+	desprenden directamente de su fórmula:
+	\begin{enumerate}[label=\textbf{\roman*)}]
+		\item Es \textbf{simétrica} respecto a $x = \mu$ --- el
+		exponente $(x-\mu)^2$ es el mismo para $\mu + t$ y
+		$\mu - t$.
+		\item Alcanza su \textbf{máximo} en $x = \mu$, donde
+		$f(\mu) = 1/(\sqrt{2\pi}\,\sigma)$.
+		\item Las \textbf{colas} decaen a cero cuando
+		$x \to \pm\infty$, más rápidamente cuanto menor es
+		$\sigma$.
+	\end{enumerate}
+	El parámetro $\mu$ controla la \emph{ubicación} de la curva
+	y $\sigma$ controla su \emph{dispersión}: una $\sigma$ pequeña
+	produce una campana alta y estrecha; una $\sigma$ grande
+	produce una campana baja y ancha.
+\end{observacion}
 
 \subsection{\textquestiondown Por qu\'{e} $\sqrt{2\pi}$?}
 
-\section{Teorema del L\'{\i}mite Central}
+La fórmula de la fdp Normal no es arbitraria. Cada uno de sus
+componentes --- la exponencial cuadrática, la constante
+$\sqrt{2\pi}$ --- tiene una justificación matemática precisa.
+Para entenderla es útil remontarse a su origen histórico.
+
+A mediados del siglo XIX, tres matemáticos llegaron a la misma
+función por caminos completamente distintos: \textbf{Carl
+	Friedrich Gauss} desde la teoría de errores de medición
+astronómica, \textbf{Pierre-Simon Laplace} desde la combinatoria
+y los límites de distribuciones binomiales, y \textbf{James
+	Clerk Maxwell} --- el mismo de las ecuaciones del
+electromagnetismo --- desde la física cinética de los gases.
+Que tres rutas tan distintas converjan a la misma función es la
+primera señal de que algo profundo está ocurriendo.
+
+\subsubsection{El argumento de Maxwell}
+
+En 1860, Maxwell quería describir cómo se distribuyen las
+velocidades de las moléculas de un gas. Postuló dos condiciones
+que parecen muy razonables:
+
+\begin{enumerate}[label=\textbf{\roman*)}]
+	\item \textbf{Isotropía:} la distribución de velocidades en
+	cada dirección ($x$, $y$, $z$) es la misma función $f$.
+	No hay ninguna dirección privilegiada.
+	\item \textbf{Independencia direccional:} las velocidades en
+	distintas direcciones son independientes entre sí.
+\end{enumerate}
+
+Si $v^2 = v_x^2 + v_y^2 + v_z^2$ es la rapidez total, la
+probabilidad conjunta debe depender solo de $v^2$ --- no de
+la dirección. Esto impone la condición funcional:
+\[
+f(v_x)\cdot f(v_y)\cdot f(v_z) = g(v_x^2 + v_y^2 + v_z^2).
+\]
+Tomando logaritmo:
+\[
+\ln f(v_x) + \ln f(v_y) + \ln f(v_z)
+= \ln g(v_x^2 + v_y^2 + v_z^2).
+\]
+La única familia de funciones que satisface esta ecuación
+funcional es
+\[
+f(t) = c\, e^{-\alpha t^2}, \qquad \alpha > 0,
+\]
+para alguna constante $c > 0$. La demostración es la siguiente:
+diferenciando la ecuación funcional respecto a $v_x$ con $v_y$
+y $v_z$ fijos, se obtiene que $(\ln f)'(v_x)$ debe ser
+proporcional a $v_x$, lo que implica $\ln f(t) = -\alpha t^2 +
+\text{cte}$, y por lo tanto $f(t) = ce^{-\alpha t^2}$.
+
+\begin{figure}[H]
+	\centering
+	\begin{tikzpicture}[scale=1.0]
+		
+		% ── Panel izquierdo: isotropía ──────────────────────────
+		\begin{scope}[shift={(0,0)}]
+			\node[font=\small\bfseries, azul] at (0, 3.2)
+			{Isotrop\'{\i}a};
+			\node[font=\scriptsize, gray] at (0, 2.75)
+			{ninguna direcci\'{o}n privilegiada};
+			
+			% Círculo de referencia
+			\draw[gray, dashed, thin, opacity=0.5] (0,0) circle (2);
+			
+			% Vectores en 8 direcciones
+			\foreach \ang in {0,45,...,315}{
+				\draw[azul, thick, ->] (0,0) --
+				(\ang:2);
+			}
+			
+			% Molécula central
+			\fill[azul!80!black] (0,0) circle (3pt);
+		\end{scope}
+		
+		% Separador vertical
+		\draw[gray, thin, opacity=0.3] (3.5,-2.8) -- (3.5,3.0);
+		
+% ── Panel derecho: descomposición ───────────────────────
+\begin{scope}[shift={(7.0,0)}]
+	\node[font=\small\bfseries, azul] at (1.0, 3.2)
+	{Descomposici\'{o}n};
+	\node[font=\scriptsize, gray] at (1.0, 2.78)
+	{depende solo de la rapidez};
+	
+	% Ejes — el eje y sube solo hasta 2.0 para no chocar
+	\draw[thick, ->] (-0.3,-2) -- (3.0,-2)
+	node[right] {$v_x$};
+	\draw[thick, ->] (-0.3,-2) -- (-0.3,2.0)
+	node[above] {$v_y$};
+	
+	% Arco de rapidez constante — centrado en el origen,
+	% pasando por la punta del vector
+	\draw[rojo, dashed, thin, opacity=0.6]
+	(-0.3,-2) ++(0:2.95) arc (0:50:2.95);
+	
+	% Vector velocidad (de origen a la punta)
+	\draw[rojo, very thick, ->] (-0.3,-2) --
+	(1.6, 0.3) node[midway, above left, font=\small]
+	{$\vec{v}$};
+	
+	% Componentes punteadas
+	\draw[azul, thick, dashed] (-0.3,-2) -- (1.6,-2);
+	\draw[azul, thick, dashed] (1.6,-2) -- (1.6,0.3);
+	
+	% Etiquetas componentes
+	\node[azul, below, font=\small] at (0.65,-2) {$v_x$};
+	\node[azul, right, font=\small] at (1.6,-0.85) {$v_y$};
+	
+	% Origen
+	\fill[rojo] (-0.3,-2) circle (2pt);
+\end{scope}
+		
+	\end{tikzpicture}
+	\caption{El argumento de Maxwell. \textbf{Izquierda:} la isotropía
+		exige que la distribución de velocidades sea la misma en todas las
+		direcciones --- no hay ninguna dirección privilegiada.
+		\textbf{Derecha:} al descomponer la velocidad en componentes
+		$v_x$ y $v_y$, la condición de que la distribución conjunta dependa
+		solo de la rapidez $v = \sqrt{v_x^2 + v_y^2}$ --- es decir, que sea
+		constante sobre cada circunferencia --- es la que fuerza la forma
+		gaussiana.}
+	\label{fig:maxwell}
+\end{figure}
+
+\begin{observacion}
+	Maxwell no buscaba justificar la distribución Normal ---
+	buscaba entender el movimiento molecular. Pero las dos
+	condiciones que postuló (isotropía e independencia
+	direccional) son tan naturales que la gaussiana emerge
+	como la \textbf{única solución posible}. La campana no se
+	elige: se impone.
+\end{observacion}
+
+\subsubsection{La integral gaussiana y el origen de $\sqrt{2\pi}$}
+
+El argumento de Maxwell justifica que la fdp tiene la forma
+$ce^{-\alpha x^2}$. Para que sea una fdp válida debe integrar
+a $1$, lo que requiere calcular:
+\[
+I = \int_{-\infty}^{\infty} e^{-x^2/2}\,dx.
+\]
+Esta integral no tiene antiderivada elemental --- no se puede
+resolver con las técnicas estándar de cálculo. El truco
+clásico es elevar $I$ al cuadrado y convertir la integral
+doble resultante a coordenadas polares.
+
+\begin{proposicion}{Integral gaussiana}{integral_gaussiana}
+	\[
+	\int_{-\infty}^{\infty} e^{-x^2/2}\,dx = \sqrt{2\pi}.
+	\]
+\end{proposicion}
+
+\begin{proof}
+	Llamemos $I = \int_{-\infty}^{\infty} e^{-x^2/2}\,dx$.
+	Entonces:
+	\[
+	I^2 = \left(\int_{-\infty}^{\infty} e^{-x^2/2}\,dx\right)
+	\left(\int_{-\infty}^{\infty} e^{-y^2/2}\,dy\right)
+	= \int_{-\infty}^{\infty}\int_{-\infty}^{\infty}
+	e^{-(x^2+y^2)/2}\,dx\,dy.
+	\]
+	Pasamos a coordenadas polares: $x = r\cos\theta$,
+	$y = r\sin\theta$, con $r \geq 0$ y $\theta \in [0, 2\pi)$.
+	El jacobiano de la transformación es $r$, y
+	$x^2 + y^2 = r^2$:
+	\[
+	I^2 = \int_0^{2\pi}\int_0^{\infty}
+	e^{-r^2/2}\,r\,dr\,d\theta
+	= 2\pi \int_0^{\infty} r\,e^{-r^2/2}\,dr.
+	\]
+	La integral restante se resuelve con la sustitución
+	$u = r^2/2$, $du = r\,dr$:
+	\[
+	\int_0^{\infty} r\,e^{-r^2/2}\,dr
+	= \int_0^{\infty} e^{-u}\,du
+	= \left[-e^{-u}\right]_0^{\infty} = 1.
+	\]
+	Por lo tanto $I^2 = 2\pi$, y como $I > 0$:
+	\[
+	I = \int_{-\infty}^{\infty} e^{-x^2/2}\,dx
+	= \sqrt{2\pi}. \qedhere
+	\]
+\end{proof}
+
+La constante $1/\sqrt{2\pi}$ en la fdp Normal es exactamente
+la constante de normalización que garantiza que $f$ integre a
+$1$ --- ni más ni menos. El $\sqrt{2\pi}$ no es un número
+misterioso: es el área bajo la curva $e^{-x^2/2}$, calculada
+por el argumento de coordenadas polares.
+
+\begin{proposicion}{Momentos de la distribuci\'{o}n Normal}
+	{momentos_normal}
+	Si $X \sim N(\mu, \sigma^2)$, entonces
+	\[
+	E(X) = \mu \qquad \text{y} \qquad \mathrm{Var}(X) = \sigma^2.
+	\]
+\end{proposicion}
+
+\begin{proof}
+	Hacemos el cambio de variable $z = (x-\mu)/\sigma$, de modo
+	que $x = \mu + \sigma z$ y $dx = \sigma\,dz$.
+	
+	\textbf{Valor esperado.}
+	\[
+	E(X) = \int_{-\infty}^{\infty} x\,\frac{1}{\sqrt{2\pi}\,\sigma}
+	e^{-\frac{(x-\mu)^2}{2\sigma^2}}\,dx
+	= \int_{-\infty}^{\infty} (\mu + \sigma z)\,
+	\frac{1}{\sqrt{2\pi}}\,e^{-z^2/2}\,dz.
+	\]
+	Separamos en dos integrales:
+	\[
+	= \mu \int_{-\infty}^{\infty} \frac{1}{\sqrt{2\pi}}\,
+	e^{-z^2/2}\,dz
+	+ \sigma \int_{-\infty}^{\infty} z\,\frac{1}{\sqrt{2\pi}}\,
+	e^{-z^2/2}\,dz.
+	\]
+	La primera integral es $1$ por la
+	Proposición~\ref{prop:integral_gaussiana}. La segunda es $0$
+	porque el integrando $z\,e^{-z^2/2}$ es una función
+	\textbf{impar} --- y la integral de una función impar sobre
+	$(-\infty, \infty)$ es cero. Por lo tanto:
+	\[
+	E(X) = \mu \cdot 1 + \sigma \cdot 0 = \mu.
+	\]
+	
+	\textbf{Varianza.} Usamos la fórmula alternativa
+	$\mathrm{Var}(X) = E\!\left[(X-\mu)^2\right]$. Con el mismo
+	cambio de variable:
+	\[
+	\mathrm{Var}(X)
+	= \int_{-\infty}^{\infty} (x-\mu)^2\,
+	\frac{1}{\sqrt{2\pi}\,\sigma}\,
+	e^{-\frac{(x-\mu)^2}{2\sigma^2}}\,dx
+	= \sigma^2 \int_{-\infty}^{\infty} z^2\,
+	\frac{1}{\sqrt{2\pi}}\,e^{-z^2/2}\,dz.
+	\]
+	Integramos por partes con $u = z$ y
+	$dv = z\,e^{-z^2/2}\,dz$, luego $du = dz$ y
+	$v = -e^{-z^2/2}$:
+	\[
+	\int_{-\infty}^{\infty} z^2\,e^{-z^2/2}\,dz
+	= \left[-z\,e^{-z^2/2}\right]_{-\infty}^{\infty}
+	+ \int_{-\infty}^{\infty} e^{-z^2/2}\,dz.
+	\]
+	El término evaluado se anula en ambos extremos porque
+	$z\,e^{-z^2/2} \to 0$ cuando $z \to \pm\infty$. La integral
+	restante es $\sqrt{2\pi}$ por la
+	Proposición~\ref{prop:integral_gaussiana}. Por lo tanto:
+	\[
+	\mathrm{Var}(X) = \frac{\sigma^2}{\sqrt{2\pi}}
+	\cdot \sqrt{2\pi} = \sigma^2. \qedhere
+	\]
+\end{proof}
+
+\begin{observacion}
+	El argumento de Maxwell y la integral gaussiana explican la
+	\textbf{forma} de la fdp Normal --- por qué el exponente es
+	cuadrático y de dónde viene $\sqrt{2\pi}$. Pero no responden
+	la pregunta más importante: ¿por qué la Normal aparece en
+	fenómenos tan distintos como alturas, errores de medición y
+	precios financieros? La respuesta no está en la física de los
+	gases sino en un resultado matemático profundo que estudiaremos
+	a continuación: el \textbf{Teorema del Límite Central}, que
+	establece que la suma de un gran número de variables aleatorias
+	independientes converge a una distribución Normal,
+	independientemente de la distribución original de cada una.
+	Esa es la verdadera razón de la ubicuidad de la Normal.
+\end{observacion}
+
+\subsection{La distribuci\'{o}n Normal est\'{a}ndar}
+
+La fdp Normal depende de dos parámetros: $\mu$ y $\sigma^2$.
+Para calcular probabilidades habría que integrar numéricamente
+para cada par $(\mu, \sigma^2)$ distinto. La solución es
+trabajar con un caso de referencia y mostrar que toda Normal
+general puede reducirse a él. Definimos ese caso de referencia
+y demostramos la reducción inmediatamente después.
+
+La \textbf{distribuci\'{o}n Normal est\'{a}ndar} es el caso
+particular $\mu = 0$ y $\sigma^2 = 1$ de la
+Definici\'{o}n~\ref{def:dist_normal}. Sustituyendo directamente:
+\[
+f(x)\big|_{\mu=0,\,\sigma^2=1}
+= \frac{1}{\sqrt{2\pi}}\,e^{-z^2/2}
+\eqqcolon \phi(z).
+\]
+
+\begin{definicion}{Distribuci\'{o}n Normal est\'{a}ndar}
+	{normal_estandar}
+	Una variable aleatoria $Z \sim N(0,1)$ tiene
+	\textbf{distribuci\'{o}n Normal est\'{a}ndar}, con fdp
+	$\phi(z) = \frac{1}{\sqrt{2\pi}}\,e^{-z^2/2}$ y FDA
+	\[
+	\Phi(z) = P(Z \leq z) =
+	\int_{-\infty}^{z} \phi(t)\,dt,
+	\qquad z \in \mathbb{R}.
+	\]
+	La función $\Phi$ no admite forma cerrada y debe tabularse
+	o calcularse numéricamente.
+\end{definicion}
+
+\begin{proposicion}{Simetr\'{\i}a de la Normal est\'{a}ndar}
+	{simetria_normal}
+	Para todo $z \in \mathbb{R}$:
+	\[
+	\Phi(-z) = 1 - \Phi(z).
+	\]
+\end{proposicion}
+
+\begin{proof}
+	Como $\phi$ es simétrica respecto a cero --- $\phi(-z) =
+	\phi(z)$ para todo $z$ --- se tiene:
+	\[
+	\Phi(-z) = \int_{-\infty}^{-z} \phi(t)\,dt
+	= \int_{z}^{\infty} \phi(t)\,dt
+	= 1 - \int_{-\infty}^{z} \phi(t)\,dt
+	= 1 - \Phi(z). \qedhere
+	\]
+\end{proof}
+
+\begin{observacion}
+	Esta proposición es la herramienta práctica más usada al
+	trabajar con la tabla de la Normal estándar: permite calcular
+	probabilidades en la cola izquierda a partir de la cola
+	derecha, y viceversa. Por ejemplo,
+	$P(Z \leq -1.96) = 1 - P(Z \leq 1.96) = 1 - \Phi(1.96)$.
+\end{observacion}
+
+\begin{proposicion}{Estandarizaci\'{o}n}{estandarizacion}
+	Si $X \sim N(\mu, \sigma^2)$, entonces
+	\[
+	Z = \frac{X - \mu}{\sigma} \sim N(0,1).
+	\]
+\end{proposicion}
+
+\begin{proof}
+	Calculamos la FDA de $Z$. Para $z \in \mathbb{R}$:
+	\[
+	P(Z \leq z) = P\!\left(\frac{X-\mu}{\sigma} \leq z\right)
+	= P(X \leq \mu + \sigma z)
+	= \int_{-\infty}^{\mu+\sigma z}
+	\frac{1}{\sqrt{2\pi}\,\sigma}
+	e^{-\frac{(x-\mu)^2}{2\sigma^2}}\,dx.
+	\]
+	Sustituimos $t = (x-\mu)/\sigma$, $dt = dx/\sigma$:
+	\[
+	= \int_{-\infty}^{z} \frac{1}{\sqrt{2\pi}}
+	e^{-t^2/2}\,dt = \Phi(z).
+	\]
+	Como la FDA de $Z$ es $\Phi$, se concluye que
+	$Z \sim N(0,1)$. \qedhere
+\end{proof}
+
+\begin{observacion}
+	La estandarización tiene una interpretación directa: $Z$
+	mide cuántas desviaciones estándar se aleja $X$ de su
+	media. Es la transformación que hace que todas las Normales
+	sean comparables entre sí y que una sola tabla --- la de
+	$\Phi$ --- sea suficiente para calcular cualquier
+	probabilidad Normal. Para calcular $P(X \leq x)$
+	con $X \sim N(\mu,\sigma^2)$:
+	\[
+	P(X \leq x) = P\!\left(Z \leq \frac{x-\mu}{\sigma}\right)
+	= \Phi\!\left(\frac{x-\mu}{\sigma}\right).
+	\]
+\end{observacion}
+
+\begin{figure}[H]
+	\centering
+	\begin{tikzpicture}[scale=0.95]
+		
+		% ── Panel izquierdo: distintos mu, sigma=1 ─────────────
+		\begin{scope}[shift={(0,0)}]
+			\node[font=\small\bfseries, azul] at (3.0, 3.5)
+			{Distinto $\mu$, mismo $\sigma = 1$};
+			
+			\draw[thick,->] (-0.5,0) -- (6.5,0) node[right] {$x$};
+			\draw[thick,->] (0,-0.2) -- (0,3.3) node[above] {};
+			
+			% mu=1, sigma=1
+			\draw[azul!50, thick, domain=0:6, samples=100]
+			plot (\x, {3.5*(1/(sqrt(2*pi)))*exp(-(\x-1)^2/2)});
+			\node[azul!50, font=\scriptsize] at (1.0, 2.0)
+			{$\mu=1$};
+			
+			% mu=3, sigma=1
+			\draw[azul, thick, domain=0:6, samples=100]
+			plot (\x, {3.5*(1/(sqrt(2*pi)))*exp(-(\x-3)^2/2)});
+			\node[azul, font=\scriptsize] at (3.0, 2.0)
+			{$\mu=3$};
+			
+			% mu=5, sigma=1
+			\draw[azul!80!black, thick, domain=0:6, samples=100]
+			plot (\x, {3.5*(1/(sqrt(2*pi)))*exp(-(\x-5)^2/2)});
+			\node[azul!80!black, font=\scriptsize] at (5.0, 2.0)
+			{$\mu=5$};
+		\end{scope}
+		
+		% ── Panel derecho: mismo mu=3, distintos sigma ──────────
+		\begin{scope}[shift={(8.0,0)}]
+			\node[font=\small\bfseries, azul] at (3.0, 3.5)
+			{Mismo $\mu=3$, distinto $\sigma$};
+			
+			\draw[thick,->] (-0.5,0) -- (6.5,0) node[right] {$x$};
+			\draw[thick,->] (0,-0.2) -- (0,3.3) node[above] {};
+			
+			% mu=3, sigma=0.5
+			\draw[azul!80!black, very thick, domain=0:6, samples=100]
+			plot (\x, {3.5*(1/(0.5*sqrt(2*pi)))*
+				exp(-(\x-3)^2/(2*0.5^2))});
+			\node[azul!80!black, font=\scriptsize] at (4.2, 2.8)
+			{$\sigma=0.5$};
+			
+			% mu=3, sigma=1
+			\draw[azul, thick, domain=0:6, samples=100]
+			plot (\x, {3.5*(1/(sqrt(2*pi)))*exp(-(\x-3)^2/2)});
+			\node[azul, font=\scriptsize] at (4.5, 1.6)
+			{$\sigma=1$};
+			
+			% mu=3, sigma=1.5
+			\draw[azul!50, thick, domain=0:6, samples=100]
+			plot (\x, {3.5*(1/(1.5*sqrt(2*pi)))*
+				exp(-(\x-3)^2/(2*1.5^2))});
+			\node[azul!50, font=\scriptsize] at (5.0, 0.8)
+			{$\sigma=1.5$};
+		\end{scope}
+		
+	\end{tikzpicture}
+	\caption{Izquierda: distintas medias $\mu$ con $\sigma=1$ ---
+		$\mu$ desplaza la curva sin cambiar su forma. Derecha: misma
+		media $\mu=3$ con distintas $\sigma$ --- $\sigma$ controla el
+		ancho y la altura de la campana.}
+	\label{fig:normal}
+\end{figure}
+
+En la práctica, el objetivo es calcular probabilidades del tipo
+$P(a \leq X \leq b)$ para $X \sim N(\mu, \sigma^2)$. La
+Proposici\'{o}n~\ref{prop:estandarizacion} reduce este problema
+a uno sobre la Normal est\'{a}ndar:
+\[
+P(a \leq X \leq b)
+= \Phi\!\left(\frac{b-\mu}{\sigma}\right)
+- \Phi\!\left(\frac{a-\mu}{\sigma}\right).
+\]
+El problema entonces es evaluar $\Phi(z)$ --- y aquí aparece
+la dificultad: la integral $\int_{-\infty}^z \phi(t)\,dt$ no
+tiene forma cerrada, es decir, no puede expresarse en términos
+de funciones elementales. Por eso se recurre a
+\textbf{tablas numéricas} que precalculan $\Phi(z)$ para una
+grilla de valores de $z$, o a software estadístico. El
+procedimiento concreto para calcular cualquier probabilidad
+Normal es:
+\begin{enumerate}[label=\textbf{\arabic*.}]
+	\item \textbf{Estandarizar} los límites: $z_a = (a-\mu)/\sigma$
+	y $z_b = (b-\mu)/\sigma$.
+	\item \textbf{Buscar} $\Phi(z_a)$ y $\Phi(z_b)$ en la tabla
+	o software.
+	\item \textbf{Restar:} $P(a \leq X \leq b) =
+	\Phi(z_b) - \Phi(z_a)$.
+\end{enumerate}
+La propiedad de simetría $\Phi(-z) = 1 - \Phi(z)$
+(Proposici\'{o}n~\ref{prop:simetria_normal}) es útil cuando
+la tabla solo cubre valores positivos de $z$: basta con cambiar
+el signo y complementar a $1$.
 
 % ==========================================================
 \chapter{Muestreo y distribuci\'{o}n de muestreo}
 
 \section{Poblaci\'{o}n, muestra y par\'{a}metro}
 
+En los capítulos anteriores trabajamos con variables aleatorias
+cuya distribución era completamente conocida: sabíamos que
+$X \sim N(\mu, \sigma^2)$ con valores específicos de $\mu$ y
+$\sigma^2$, y calculábamos probabilidades a partir de eso. En
+la práctica, sin embargo, ocurre algo distinto: a menudo
+tenemos razones para creer que una variable sigue cierto
+\emph{tipo} de distribución --- una Normal, una Poisson, una
+Exponencial --- pero \textbf{no conocemos los parámetros
+	específicos} que la determinan. Sabemos que las alturas de una
+población se distribuyen normalmente, pero no sabemos cuáles son
+$\mu$ y $\sigma^2$. Sabemos que las llegadas a un servidor
+siguen un proceso de Poisson, pero no conocemos $\lambda$.
+
+El problema central de la inferencia estadística es precisamente
+este: dado que conocemos la \emph{familia} de distribuciones a
+la que pertenece la variable de interés, ¿cómo estimamos el
+parámetro desconocido que la identifica dentro de esa familia?
+La herramienta es la \textbf{muestra} --- un conjunto de
+observaciones generadas por la distribución real --- y el
+objetivo es usar esas observaciones para aprender algo sobre el
+parámetro desconocido. Este capítulo formaliza ese proceso.
+
+\begin{definicion}{Familia indexada}{familia_indexada}
+	Sea $\Theta$ un conjunto no vacío. Una \textbf{familia
+		indexada} por $\Theta$ es una función
+	\[
+	\theta \mapsto P_\theta
+	\]
+	que asigna a cada elemento $\theta \in \Theta$ un objeto
+	$P_\theta$ de alguna colección. El conjunto $\Theta$ se
+	denomina \textbf{conjunto de índices} y cada $\theta$ es
+	un \textbf{índice}.
+\end{definicion}
+
+\begin{observacion}
+	La indexación no es más que una función con notación
+	distinta. En lugar de escribir $f(\theta)$ para el
+	objeto asociado a $\theta$, escribimos $P_\theta$ ---
+	el índice aparece como subíndice en lugar de argumento.
+	La razón es puramente notacional: cuando los objetos
+	son distribuciones de probabilidad, $P_\theta$ es más
+	natural que $P(\theta)$, que podría confundirse con
+	la probabilidad de un evento $\theta$.
+	
+	En el caso de una familia paramétrica, los objetos
+	indexados son distribuciones de probabilidad y el
+	conjunto de índices $\Theta$ es el espacio paramétrico.
+	Decir que $\mathcal{F} = \{P_\theta : \theta \in
+	\Theta\}$ está indexada por $\Theta$ significa
+	simplemente que existe una función biunívoca entre
+	$\Theta$ y las distribuciones de $\mathcal{F}$ ---
+	cada $\theta$ determina unívocamente una distribución
+	y cada distribución corresponde a exactamente un
+	$\theta$.
+\end{observacion}
+
+\begin{definicion}{Familia param\'{e}trica}{familia_parametrica}
+	Sea $\Theta \subseteq \mathbb{R}^k$ un conjunto llamado
+	\textbf{espacio param\'{e}trico}. Una \textbf{familia
+		param\'{e}trica} es una colección de distribuciones de
+	probabilidad indexada por $\Theta$:
+	\[
+	\mathcal{F} = \{P_\theta : \theta \in \Theta\},
+	\]
+	donde cada $\theta \in \Theta$ determina unívocamente una
+	distribución $P_\theta$.
+\end{definicion}
+
+\begin{definicion}{Poblaci\'{o}n}{poblacion}
+	Dada una familia paramétrica $\mathcal{F} = \{P_\theta :
+	\theta \in \Theta\}$, la \textbf{población} es la
+	distribución $P_{\theta_0} \in \mathcal{F}$ que gobierna
+	la variable de interés, donde $\theta_0 \in \Theta$ es el
+	\textbf{verdadero valor del parámetro} --- fijo pero
+	desconocido.
+\end{definicion}
+
+\begin{definicion}{Par\'{a}metro}{parametro}
+	El \textbf{parámetro} es el valor $\theta_0 \in \Theta$
+	que indexa la población real $P_{\theta_0}$. Los parámetros
+	más comunes son escalares como la media $\mu$ o la tasa
+	$\lambda$, o vectores como $(\mu, \sigma^2)$ en el caso
+	Normal.
+\end{definicion}
+
+\begin{observacion}
+	La distinción entre familia y población es fundamental.
+	La \emph{familia} $\mathcal{F}$ es el conocimiento previo
+	que traemos al problema --- el tipo de distribución que
+	creemos describe el fenómeno. La \emph{población}
+	$P_{\theta_0}$ es la distribución específica dentro de
+	esa familia que realmente opera en el mundo, pero cuyo
+	parámetro $\theta_0$ desconocemos. El objetivo de la
+	inferencia estadística es estimar $\theta_0$ a partir
+	de datos observados.
+\end{observacion}
+
+\begin{definicion}{Muestra}{muestra}
+	Una \textbf{muestra} de tamaño $n$ es un conjunto de
+	observaciones $\{x_1, x_2, \ldots, x_n\}$ generadas por
+	la población $P_{\theta_0}$.
+\end{definicion}
+
+En términos simples:
+
+\begin{itemize}[leftmargin=2em]
+	\item La \textbf{población} es el fenómeno completo que
+	queremos estudiar --- la distribución real que gobierna
+	la variable de interés. Existe, es fija, pero no la
+	conocemos completamente.
+	\item El \textbf{parámetro} es el número (o números) que
+	describen esa población. Conocer el parámetro equivale
+	a conocer la población: si supiéramos que las alturas
+	siguen $N(170, 49)$, sabríamos todo lo que hay que saber
+	sobre su distribución. El problema es que $\theta_0$
+	es desconocido.
+	\item La \textbf{muestra} es el subconjunto de
+	observaciones que podemos obtener. Es nuestra única
+	ventana hacia la población --- a partir de ella
+	intentamos inferir $\theta_0$.
+\end{itemize}
+
+El objetivo de la inferencia estadística es usar la muestra
+para aprender sobre el parámetro, sabiendo que nunca
+tendremos acceso directo a la población completa.
+
+\section{Muestra aleatoria}
+
+Para que las conclusiones extraídas de una muestra sean
+válidas, la selección de sus elementos no puede ser
+arbitraria. La forma más rigurosa de garantizar esto es
+modelar cada observación como una variable aleatoria
+independiente con la misma distribución poblacional.
+
+\begin{definicion}{Muestra aleatoria}{muestra_aleatoria}
+	Las variables aleatorias $X_1, X_2, \ldots, X_n$
+	constituyen una \textbf{muestra aleatoria} de tamaño $n$
+	de la población $P_{\theta_0}$ si son independientes e
+	idénticamente distribuidas (i.i.d.) con distribución
+	$P_{\theta_0}$.
+\end{definicion}
+
+\begin{observacion}
+	Esta definición es exactamente la misma que la de
+	variables i.i.d.\ introducida en la
+	Definición~\ref{def:iid}. La muestra aleatoria no es un
+	concepto nuevo --- es el mismo objeto matemático aplicado
+	ahora a un contexto de inferencia. Cada $X_i$ representa
+	el resultado de observar un elemento de la población
+	seleccionado al azar; la independencia garantiza que
+	ninguna observación influye sobre las demás, y la identidad
+	de distribución garantiza que todas provienen de la misma
+	población $P_{\theta_0}$.
+	
+	Esta definición supone implícitamente que la población es
+	suficientemente grande para que la extracción de cada
+	elemento no altere la distribución de los restantes ---
+	es decir, se asume muestreo con reposición o una población
+	infinita.
+\end{observacion}
+
 \section{Estad\'{\i}stico y estimador}
 
-\section{Distribuciones de muestreo}
+A partir de una muestra aleatoria $X_1, \ldots, X_n$
+podemos calcular distintas funciones de los datos. Cada
+una de esas funciones es un \textbf{estadístico}.
 
-\subsection{Distribuci\'{o}n $t$ de Student}
+\begin{definicion}{Estad\'{\i}stico}{estadistico}
+	Un \textbf{estadístico} es cualquier función
+	\[
+	T = g(X_1, X_2, \ldots, X_n)
+	\]
+	de las observaciones de una muestra aleatoria que no
+	depende de parámetros desconocidos. Un estadístico es
+	en sí mismo una variable aleatoria --- su valor varía
+	de muestra en muestra.
+\end{definicion}
 
-\subsection{Distribuci\'{o}n Chi-cuadrado $\chi^2$}
+\begin{observacion}
+	La condición de que el estadístico no dependa de
+	parámetros desconocidos es esencial: si $T$ dependiera
+	de $\theta_0$, no podríamos calcularlo sin conocer
+	precisamente lo que queremos estimar. Un estadístico
+	debe ser computable directamente a partir de los datos
+	observados.
+	
+	Que un estadístico sea una variable aleatoria es
+	fundamental: no tiene un valor fijo, sino una
+	distribución propia --- la \textbf{distribución
+		muestral} --- que depende de la distribución de la
+	población $P_{\theta_0}$. Estudiar esa distribución
+	es lo que permite hacer inferencia sobre $\theta_0$.
+\end{observacion}
 
-\subsection{Distribuci\'{o}n $F$ de Fisher}
+Cuando un estadístico se usa específicamente para aproximar
+un parámetro desconocido, se denomina \textbf{estimador}.
+
+\begin{definicion}{Estimador y estimaci\'{o}n puntual}
+	{estimador}
+	Un \textbf{estimador puntual} de $\theta_0$ es un
+	estadístico $\hat{\theta} = g(X_1, \ldots, X_n)$ usado
+	para aproximar $\theta_0$. Una vez observada la muestra
+	$(x_1, \ldots, x_n)$, el valor numérico
+	$\hat{\theta}(x_1, \ldots, x_n)$ se denomina
+	\textbf{estimación puntual} de $\theta_0$.
+\end{definicion}
+
+\begin{observacion}
+	La distinción entre estimador y estimación es análoga
+	a la distinción entre variable aleatoria y realización:
+	el estimador $\hat{\theta}$ es la \emph{regla},
+	expresada antes de observar los datos; la estimación
+	es el \emph{número} que resulta de aplicar esa regla
+	a los datos observados. Por ejemplo, la media muestral
+	\[
+	\bar{X} = \frac{1}{n}\sum_{i=1}^n X_i
+	\]
+	es un estimador de $\mu$; el valor $\bar{x} = 28.75$
+	calculado de una muestra particular es una estimación.
+\end{observacion}
+
+\section{Propiedades de los estimadores puntuales}
+\label{sec:propiedades_estimadores}
+
+Un parámetro $\theta_0$ puede tener muchos estimadores
+distintos. ¿Cómo elegir entre ellos? La respuesta no es
+arbitraria --- existen criterios matemáticos precisos que
+permiten evaluar la calidad de un estimador. Estudiaremos
+tres: \textbf{insesgadez}, \textbf{eficiencia} y
+\textbf{consistencia}. Cada uno responde una pregunta
+distinta sobre el comportamiento del estimador.
+
+\subsection{Insesgadez}
+
+La primera pregunta que podemos hacerle a un estimador es
+la más básica: ¿apunta en la dirección correcta? Un
+estimador que sistemáticamente sobreestima o subestima
+$\theta_0$ tiene un error estructural que no desaparece
+sin importar cuántos datos tengamos. La insesgadez
+formaliza la ausencia de ese error sistemático.
+
+\begin{definicion}{Estimador insesgado}{insesgadez}
+	Un estimador $\hat{\theta}$ de $\theta_0$ es
+	\textbf{insesgado} si
+	\[
+	E_{\theta_0}(\hat{\theta}) = \theta_0
+	\qquad \text{para todo } \theta_0 \in \Theta.
+	\]
+	La cantidad
+	\[
+	B(\hat{\theta}) = E_{\theta_0}(\hat{\theta}) - \theta_0
+	\]
+	se denomina \textbf{sesgo} del estimador. Si
+	$B(\hat{\theta}) = 0$, el estimador es insesgado.
+\end{definicion}
+
+\begin{observacion}
+	La notación $E_{\theta_0}$ enfatiza que el valor esperado
+	se calcula bajo la distribución $P_{\theta_0}$ ---
+	asumiendo que el verdadero parámetro es $\theta_0$. La
+	condición debe valer para \emph{todo} $\theta_0 \in
+	\Theta$: un estimador insesgado apunta al parámetro
+	correcto sin importar cuál sea ese parámetro.
+	
+	La insesgadez no garantiza que una estimación particular
+	sea exacta --- solo garantiza que el estimador no tiene
+	un error sistemático. En cualquier muestra concreta,
+	$\hat{\theta}$ puede diferir de $\theta_0$; lo que la
+	insesgadez asegura es que esas diferencias se cancelan
+	en promedio.
+\end{observacion}
+
+\begin{observacion}
+	El \textbf{principio de estimación insesgada} establece
+	que, ante varios estimadores de $\theta_0$, se prefiere
+	uno insesgado. Si todos son insesgados, se aplica el
+	criterio de eficiencia que se describe a continuación.
+\end{observacion}
+
+\subsection{Eficiencia}
+
+Dos estimadores pueden ser ambos insesgados --- ambos
+apuntan en la dirección correcta en promedio --- y aun así
+diferir en cuán dispersas son sus estimaciones alrededor
+de $\theta_0$. El que produce estimaciones más concentradas
+cerca del parámetro verdadero es preferible. La eficiencia
+formaliza esta comparación.
+
+\begin{definicion}{Eficiencia relativa}{eficiencia}
+	Sean $\hat{\theta}_1$ y $\hat{\theta}_2$ dos estimadores
+	insesgados de $\theta_0$. Se dice que $\hat{\theta}_1$
+	es \textbf{más eficiente} que $\hat{\theta}_2$ si
+	\[
+	\mathrm{Var}_{\theta_0}(\hat{\theta}_1) 
+	\mathrm{Var}_{\theta_0}(\hat{\theta}_2)
+	\qquad \text{para todo } \theta_0 \in \Theta.
+	\]
+\end{definicion}
+
+\begin{observacion}
+	La raíz cuadrada de la varianza del estimador,
+	\[
+	\mathrm{SE}(\hat{\theta}) =
+	\sqrt{\mathrm{Var}_{\theta_0}(\hat{\theta})},
+	\]
+	se denomina \textbf{error estándar} del estimador y es
+	la medida práctica más usada de su precisión. Un
+	estimador con menor error estándar produce estimaciones
+	más estables y más cercanas a $\theta_0$ de muestra
+	en muestra.
+	
+	Por ahora comparamos estimadores de a pares. En la
+	Sección~\ref{sec:cramer_rao} veremos que el Teorema de
+	Cramér-Rao establece una cota absoluta --- la menor
+	varianza que puede tener cualquier estimador insesgado
+	--- lo que permitirá hablar de eficiencia en un sentido
+	más fuerte que la mera comparación entre dos
+	estimadores.
+\end{observacion}
+
+La figura de los tiradores ilustra la diferencia entre
+insesgadez y eficiencia. El centro de la diana representa
+$\theta_0$; cada disparo representa una estimación obtenida
+de una muestra distinta.
+
+\begin{figure}[H]
+	\centering
+	\begin{tikzpicture}[scale=0.85]
+		
+		% ── Tirador A: insesgado, no eficiente ──────────────
+		\begin{scope}[shift={(0,0)}]
+			\foreach \r in {1.8, 1.2, 0.6}{
+				\draw[gray, thin] (0,0) circle (\r);
+			}
+			\draw[gray, very thin, dashed] (-2,0)--(2,0);
+			\draw[gray, very thin, dashed] (0,-2)--(0,2);
+			\fill[rojo] (-1.2, 0.8) circle (2.5pt);
+			\fill[rojo] ( 0.9,-1.3) circle (2.5pt);
+			\fill[rojo] (-0.7,-1.0) circle (2.5pt);
+			\fill[rojo] ( 1.4, 0.3) circle (2.5pt);
+			\fill[rojo] (-0.3, 1.5) circle (2.5pt);
+			\fill[rojo] ( 0.5,-0.9) circle (2.5pt);
+			\node[font=\small\bfseries] at (0,-2.5) {A};
+			\node[font=\scriptsize, gray, align=center] at (0,-3.1)
+			{insesgado\\no eficiente};
+		\end{scope}
+		
+		% ── Tirador B: sesgado, eficiente ───────────────────
+		\begin{scope}[shift={(5.5,0)}]
+			\foreach \r in {1.8, 1.2, 0.6}{
+				\draw[gray, thin] (0,0) circle (\r);
+			}
+			\draw[gray, very thin, dashed] (-2,0)--(2,0);
+			\draw[gray, very thin, dashed] (0,-2)--(0,2);
+			\fill[azul] (-0.8, 1.2) circle (2.5pt);
+			\fill[azul] (-1.0, 1.4) circle (2.5pt);
+			\fill[azul] (-0.9, 1.1) circle (2.5pt);
+			\fill[azul] (-0.7, 1.3) circle (2.5pt);
+			\fill[azul] (-1.1, 1.0) circle (2.5pt);
+			\fill[azul] (-0.8, 1.5) circle (2.5pt);
+			\node[font=\small\bfseries] at (0,-2.5) {B};
+			\node[font=\scriptsize, gray, align=center] at (0,-3.1)
+			{sesgado\\eficiente};
+		\end{scope}
+		
+		% ── Tirador C: insesgado, eficiente ─────────────────
+		\begin{scope}[shift={(11,0)}]
+			\foreach \r in {1.8, 1.2, 0.6}{
+				\draw[gray, thin] (0,0) circle (\r);
+			}
+			\draw[gray, very thin, dashed] (-2,0)--(2,0);
+			\draw[gray, very thin, dashed] (0,-2)--(0,2);
+			\fill[verde!70!black] (-0.2, 0.3) circle (2.5pt);
+			\fill[verde!70!black] ( 0.3,-0.2) circle (2.5pt);
+			\fill[verde!70!black] (-0.3,-0.3) circle (2.5pt);
+			\fill[verde!70!black] ( 0.2, 0.4) circle (2.5pt);
+			\fill[verde!70!black] (-0.1,-0.3) circle (2.5pt);
+			\fill[verde!70!black] ( 0.3, 0.1) circle (2.5pt);
+			\node[font=\small\bfseries] at (0,-2.5) {C};
+			\node[font=\scriptsize, gray, align=center] at (0,-3.1)
+			{insesgado\\eficiente};
+		\end{scope}
+		
+	\end{tikzpicture}
+	\caption{Analogía entre estimadores y tiradores. El centro
+		de la diana representa $\theta_0$. Cada punto es una
+		estimación obtenida de una muestra distinta. El estimador~A
+		es insesgado pero no eficiente: las estimaciones se centran
+		en $\theta_0$ pero son muy dispersas. El estimador~B es
+		eficiente pero sesgado: las estimaciones son muy
+		concentradas pero apuntan sistemáticamente al lugar
+		equivocado. El estimador~C es insesgado \textbf{y}
+		eficiente: el ideal.}
+	\label{fig:tiradores}
+\end{figure}
+
+\subsection{Consistencia}
+
+Los criterios de insesgadez y eficiencia evalúan el
+estimador para un tamaño de muestra $n$ fijo. La
+consistencia evalúa su comportamiento cuando $n$ crece:
+¿mejora el estimador a medida que tenemos más datos?
+
+\begin{definicion}{Estimador consistente}{consistencia}
+	Un estimador $\hat{\theta}_n$ de $\theta_0$ es
+	\textbf{consistente} si converge en probabilidad a
+	$\theta_0$ cuando $n \to \infty$: para todo
+	$\varepsilon > 0$ y todo $\theta_0 \in \Theta$,
+	\[
+	\lim_{n \to \infty} P_{\theta_0}\!\left(
+	|\hat{\theta}_n - \theta_0| > \varepsilon
+	\right) = 0.
+	\]
+\end{definicion}
+
+\begin{observacion}
+	La consistencia es una propiedad asintótica: garantiza
+	que con suficientes datos el estimador puede aproximar
+	$\theta_0$ con tanta precisión como se desee. Es una
+	condición mínima deseable --- un estimador que no
+	mejora con más datos es de poco valor práctico.
+	
+	Un criterio suficiente para la consistencia, y el más
+	utilizado en la práctica, es que el sesgo y la varianza
+	del estimador converjan ambos a cero cuando
+	$n \to \infty$:
+	\[
+	B(\hat{\theta}_n) \to 0
+	\qquad \text{y} \qquad
+	\mathrm{Var}_{\theta_0}(\hat{\theta}_n) \to 0
+	\qquad \text{cuando } n \to \infty.
+	\]
+	Este criterio suficiente se justifica formalmente
+	mediante la \textbf{desigualdad de Chebyshev}:
+	\[
+	P_{\theta_0}(|\hat{\theta}_n - \theta_0|
+	> \varepsilon)
+	\leq \frac{E_{\theta_0}[(\hat{\theta}_n -
+		\theta_0)^2]}{\varepsilon^2}
+	= \frac{\mathrm{Var}_{\theta_0}(\hat{\theta}_n)
+		+ B(\hat{\theta}_n)^2}{\varepsilon^2}.
+	\]
+	Si sesgo y varianza convergen a cero, el lado derecho
+	converge a cero para todo $\varepsilon > 0$, lo que
+	establece la consistencia.
+\end{observacion}
+
+\section{Funci\'{o}n de verosimilitud e informaci\'{o}n de
+	Fisher}
+
+En la secci\'{o}n anterior definimos la eficiencia como la
+comparaci\'{o}n de varianzas entre estimadores insesgados.
+Pero esa definici\'{o}n es relativa --- solo dice que
+$\hat{\theta}_1$ es mejor que $\hat{\theta}_2$, sin
+responder si existe un l\'{i}mite absoluto a cu\'{a}n
+preciso puede ser cualquier estimador insesgado. Las
+preguntas que quedan abiertas son tres:
+
+\begin{itemize}[leftmargin=2em]
+	\item ¿Existe una varianza m\'{i}nima que ning\'{u}n
+	estimador insesgado puede superar?
+	\item Si existe, ¿de qu\'{e} depende ese l\'{i}mite?
+	\item ¿Hay alg\'{u}n estimador que lo alcance?
+\end{itemize}
+
+La respuesta a las tres viene del Teorema de Cram\'{e}r-Rao,
+que estudiaremos en la secci\'{o}n siguiente. Pero para
+llegar ah\'{i} necesitamos primero un concepto nuevo:
+cu\'{a}nta \textbf{informaci\'{o}n} contienen los datos
+sobre el par\'{a}metro $\theta_0$. La intuici\'{o}n es
+directa: si los datos son muy informativos sobre $\theta_0$,
+es posible construir estimadores muy precisos. Si los datos
+contienen poca informaci\'{o}n, ning\'{u}n estimador
+podr\'{a} ser preciso --- hay un l\'{i}mite impuesto por
+los propios datos. Formalizar esa intuici\'{o}n requiere
+primero introducir la \textbf{funci\'{o}n de verosimilitud}.
+
+\subsection{Funci\'{o}n de verosimilitud}
+
+Dada una muestra observada $x_1, x_2, \ldots, x_n$,
+distintos valores de $\theta$ hacen que esa muestra sea
+m\'{a}s o menos probable. La pregunta natural es: ¿cu\'{a}n
+probable era observar exactamente estos datos bajo cada
+posible valor de $\theta$? La respuesta viene directamente
+de la definici\'{o}n de muestra aleatoria
+(Definici\'{o}n~\ref{def:muestra_aleatoria}): como las
+observaciones son i.i.d., la probabilidad conjunta de
+observar $x_1, x_2, \ldots, x_n$ bajo $P_\theta$ es
+\[
+P_\theta(X_1 = x_1, \ldots, X_n = x_n)
+= \prod_{i=1}^n p_\theta(x_i).
+\]
+Esta cantidad, vista como funci\'{o}n de $\theta$ con
+los datos fijos, es la \textbf{funci\'{o}n de
+	verosimilitud} --- y es lo que define cu\'{a}n compatible
+es cada valor de $\theta$ con los datos observados.
+
+\begin{definicion}{Funci\'{o}n de verosimilitud}
+	{verosimilitud}
+	Sea $X_1, X_2, \ldots, X_n$ una muestra aleatoria de
+	$P_\theta$ con funci\'{o}n de masa o densidad
+	$p_\theta$. La \textbf{funci\'{o}n de verosimilitud}
+	es la funci\'{o}n $L: \Theta \to \mathbb{R}$ definida
+	por
+	\[
+	L(\theta) = L(\theta;\, x_1, \ldots, x_n)
+	= \prod_{i=1}^{n} p_\theta(x_i),
+	\qquad \theta \in \Theta.
+	\]
+\end{definicion}
+
+\begin{observacion}
+	Hay una distinci\'{o}n crucial entre $p_\theta(x)$ y
+	$L(\theta)$:
+	\begin{itemize}[leftmargin=2em]
+		\item $p_\theta(x)$ es una funci\'{o}n de $x$ con
+		$\theta$ fijo --- describe la distribuci\'{o}n de
+		los datos dado el par\'{a}metro.
+		\item $L(\theta)$ es una funci\'{o}n de $\theta$
+		con los datos $x_1, \ldots, x_n$ fijos ---
+		describe cu\'{a}n compatible es cada valor de
+		$\theta$ con los datos observados.
+	\end{itemize}
+	La verosimilitud no es una funci\'{o}n de densidad
+	sobre $\Theta$ --- no integra necesariamente a $1$.
+	Es simplemente una medida relativa de compatibilidad
+	entre par\'{a}metros y datos.
+	
+	El producto $\prod_{i=1}^n p_\theta(x_i)$ se justifica
+	por la independencia de la muestra aleatoria: la
+	probabilidad conjunta de observar $x_1, \ldots, x_n$
+	es el producto de las probabilidades individuales.
+\end{observacion}
+
+\subsection{Log-verosimilitud y funci\'{o}n score}
+
+Trabajar con el producto $\prod_{i=1}^n p_\theta(x_i)$
+es algebraicamente inc\'{o}modo, especialmente al
+diferenciar. La soluci\'{o}n est\'{a}ndar es tomar
+logaritmo --- lo que convierte el producto en una suma
+y preserva el orden de los m\'{a}ximos porque el logaritmo
+es una funci\'{o}n estrictamente creciente.
+
+\begin{definicion}{Log-verosimilitud y funci\'{o}n score}
+	{score}
+	La \textbf{log-verosimilitud} es
+	\[
+	\ell(\theta) = \ln L(\theta)
+	= \sum_{i=1}^{n} \ln p_\theta(x_i).
+	\]
+	La \textbf{funci\'{o}n score} es la derivada de la
+	log-verosimilitud respecto a $\theta$:
+	\[
+	s(\theta) = \frac{\partial}{\partial\theta}
+	\ell(\theta)
+	= \sum_{i=1}^{n} \frac{\partial}{\partial\theta}
+	\ln p_\theta(x_i).
+	\]
+\end{definicion}
+
+\begin{observacion}
+	La funci\'{o}n score mide cu\'{a}n sensible es la
+	log-verosimilitud al par\'{a}metro $\theta$. Si
+	$s(\theta_0) = 0$, la log-verosimilitud alcanza un
+	punto estacionario en $\theta_0$ --- intuitivamente,
+	los datos son compatibles con $\theta_0$ y no
+	``empujan'' hacia ning\'{u}n otro valor. Esta
+	propiedad es la base del estimador de m\'{a}xima
+	verosimilitud, que estudiaremos en cursos posteriores.
+\end{observacion}
+
+Antes de definir la informaci\'{o}n de Fisher necesitamos
+un resultado fundamental sobre el score: que su valor
+esperado bajo $P_{\theta_0}$ es cero.
+
+\begin{proposicion}{Media cero del score}{score_media_cero}
+	Bajo condiciones de regularidad sobre $p_\theta$,
+	\[
+	E_{\theta_0}[s(\theta_0)] = 0.
+	\]
+\end{proposicion}
+
+\begin{proof}
+	Como $p_\theta$ es una funci\'{o}n de densidad,
+	integra a $1$ para todo $\theta$:
+	\[
+	\int_{-\infty}^{\infty} p_\theta(x)\,dx = 1.
+	\]
+	Diferenciando ambos lados respecto a $\theta$ e
+	intercambiando derivada e integral (condici\'{o}n de
+	regularidad):
+	\[
+	\int_{-\infty}^{\infty}
+	\frac{\partial}{\partial\theta}
+	p_\theta(x)\,dx = 0.
+	\]
+	Usando la identidad
+	$\frac{\partial}{\partial\theta}\ln p_\theta(x)
+	= \frac{1}{p_\theta(x)}
+	\frac{\partial}{\partial\theta}p_\theta(x)$:
+	\[
+	\int_{-\infty}^{\infty}
+	\frac{\partial}{\partial\theta}\ln p_\theta(x)
+	\cdot p_\theta(x)\,dx = 0.
+	\]
+	El lado izquierdo es exactamente
+	$E_{\theta_0}[s(\theta_0)]$ para una muestra de
+	tama\~{n}o $n=1$. Para una muestra de tama\~{n}o
+	$n$ general, por linealidad del valor esperado:
+	\[
+	E_{\theta_0}[s(\theta_0)]
+	= \sum_{i=1}^n E_{\theta_0}\!\left[
+	\frac{\partial}{\partial\theta}
+	\ln p_\theta(X_i)\right] = 0. \qedhere
+	\]
+\end{proof}
+
+\begin{observacion}
+	Las \textbf{condiciones de regularidad} mencionadas en
+	la proposici\'{o}n son condiciones t\'{e}cnicas sobre
+	$p_\theta$ que permiten intercambiar el orden de
+	derivaci\'{o}n e integraci\'{o}n. La m\'{a}s
+	importante es que el soporte de $p_\theta$ --- el
+	conjunto de $x$ donde $p_\theta(x) > 0$ --- no
+	dependa de $\theta$. Todas las familias param\'{e}tricas
+	cl\'{a}sicas (Normal, Poisson, Exponencial, Binomial)
+	satisfacen estas condiciones.
+\end{observacion}
+
+\subsection{Informaci\'{o}n de Fisher}
+
+Tenemos el score $s(\theta)$ --- una variable aleatoria
+con media cero. Su varianza mide cu\'{a}nto fluctua el
+score alrededor de cero, lo que a su vez mide cu\'{a}n
+sensible es la distribuci\'{o}n al par\'{a}metro. Esa
+varianza es la \textbf{informaci\'{o}n de Fisher}.
+
+\begin{definicion}{Informaci\'{o}n de Fisher}{fisher_info}
+	La \textbf{informaci\'{o}n de Fisher} sobre $\theta_0$
+	contenida en una observaci\'{o}n $X$ es
+	\[
+	\mathcal{I}(\theta_0) =
+	\mathrm{Var}_{\theta_0}(s(\theta_0))
+	= E_{\theta_0}\!\left[
+	\left(\frac{\partial}{\partial\theta}
+	\ln p_{\theta_0}(X)\right)^2\right],
+	\]
+	donde la segunda igualdad usa que
+	$E_{\theta_0}[s(\theta_0)] = 0$
+	(Proposici\'{o}n~\ref{prop:score_media_cero}).
+\end{definicion}
+
+\begin{observacion}
+	La informaci\'{o}n de Fisher tiene una forma alternativa
+	\'{u}til bajo condiciones de regularidad:
+	\[
+	\mathcal{I}(\theta_0) = -E_{\theta_0}\!\left[
+	\frac{\partial^2}{\partial\theta^2}
+	\ln p_{\theta_0}(X)\right].
+	\]
+	Esta expresi\'{o}n --- la curvatura esperada negativa
+	de la log-verosimilitud --- es frecuentemente m\'{a}s
+	f\'{a}cil de calcular que la forma cuadr\'{a}tica.
+	Interpretaci\'{o}n: si la log-verosimilitud tiene una
+	curvatura muy pronunciada alrededor de $\theta_0$,
+	los datos son muy informativos sobre $\theta_0$. Si
+	la curvatura es suave, los datos dicen poco.
+\end{observacion}
+
+Esto lo podemos ilustrar mejor con un ejemplo:
+
+\begin{ejemplo}{Informaci\'{o}n de Fisher para
+		Bernoulli}{fisher_bernoulli}
+	Sea $X \sim \mathrm{Bernoulli}(p)$ con $p \in (0,1)$.
+	Calculamos $\mathcal{I}(p)$.
+	
+	La funci\'{o}n de masa es $p_p(x) = p^x(1-p)^{1-x}$
+	para $x \in \{0,1\}$. La log-verosimilitud para una
+	observaci\'{o}n es:
+	\[
+	\ln p_p(x) = x\ln p + (1-x)\ln(1-p).
+	\]
+	La funci\'{o}n score es:
+	\[
+	\frac{\partial}{\partial p}\ln p_p(x)
+	= \frac{x}{p} - \frac{1-x}{1-p}
+	= \frac{x - p}{p(1-p)}.
+	\]
+	La informaci\'{o}n de Fisher es la varianza del score:
+	\[
+	\mathcal{I}(p)
+	= E_p\!\left[\left(\frac{X-p}{p(1-p)}\right)^2\right]
+	= \frac{1}{p^2(1-p)^2}\,E_p[(X-p)^2]
+	= \frac{\mathrm{Var}_p(X)}{p^2(1-p)^2}.
+	\]
+	Como $\mathrm{Var}_p(X) = p(1-p)$ para una Bernoulli
+	(Proposici\'{o}n~\ref{prop:momentos_bern}):
+	\[
+	\mathcal{I}(p) = \frac{p(1-p)}{p^2(1-p)^2}
+	= \frac{1}{p(1-p)}.
+	\]
+\end{ejemplo}
+
+\begin{observacion}
+	El resultado $\mathcal{I}(p) = 1/(p(1-p))$ tiene una
+	interpretaci\'{o}n intuitiva clara. Cuando $p$ est\'{a}
+	cerca de $0$ o de $1$, la funci\'{o}n $1/(p(1-p))$
+	es muy grande --- los datos son muy informativos sobre
+	$p$, porque casi siempre sale el mismo resultado y
+	cualquier desviaci\'{o}n es muy reveladora. Cuando
+	$p = 0.5$, la informaci\'{o}n es m\'{i}nima ---
+	los resultados son m\'{a}xximamente impredecibles y
+	cada observaci\'{o}n dice poco sobre el valor exacto
+	de $p$.
+	
+	La cota de Cram\'{e}r-Rao para una muestra de
+	tama\~{n}o $n$ es:
+	\[
+	\mathrm{Var}_p(\hat{p}) \geq
+	\frac{1}{n\,\mathcal{I}(p)}
+	= \frac{p(1-p)}{n}.
+	\]
+	Notemos que esta cota es exactamente la varianza de
+	la media muestral $\bar{X}$ --- lo que anticipa que
+	$\bar{X}$ es un estimador eficiente de $p$ en el
+	sentido de Cram\'{e}r-Rao.
+\end{observacion}
+
+\begin{figure}[H]
+	\centering
+	\begin{tikzpicture}[scale=1.0]
+		
+		\draw[thick,->] (-0.2,0) -- (5.5,0)
+		node[right] {$p$};
+		\draw[thick,->] (0,-0.2) -- (0,5.0)
+		node[above] {$\mathcal{I}(p)$};
+		
+		% Curva I(p) = 1/(p(1-p)) escalada
+		% x en [0.1, 0.9] mapeado a [0.5, 4.5]
+		% I(p) = 1/(p(1-p)), maximo en extremos
+		% Escalamos: x_plot = p*5, y_plot = min(I(p)/2, 4.5)
+		\draw[azul, very thick, domain=0.12:0.88, samples=200]
+		plot ({5*\x}, {min(1/(5*\x*(1-\x)), 4.5)});
+		
+		% Mínimo en p=0.5: I(0.5) = 4, y_plot = 4/2 = 2
+		\draw[rojo, dashed, thick] (2.5,0) --
+		(2.5, {1/(5*0.5*0.5)});
+		\draw[rojo, dashed, thick] (0, {1/(5*0.5*0.5)}) --
+		(2.5, {1/(5*0.5*0.5)});
+		\node[rojo, left, font=\small] at
+		(0, {1/(5*0.5*0.5)}) {$4$};
+		\node[rojo, below, font=\small] at (2.5,0) {$0.5$};
+		
+		% Etiquetas eje x
+		\foreach \p/\lbl in {
+			0.5/0.1, 1.0/0.2, 1.5/0.3, 2.0/0.4,
+			3.0/0.6, 3.5/0.7, 4.0/0.8, 4.5/0.9}{
+			\node[below, font=\scriptsize] at (\p, 0) {$\lbl$};
+			\draw[thin] (\p, 0.05) -- (\p,-0.05);
+		}
+		
+		% Anotaciones
+		\node[azul, font=\small, align=center] at (1.2, 4.2)
+		{alta informaci\'{o}n\\cerca de $0$};
+		\draw[azul, ->, thin] (1.2, 3.8) -- (0.7, 3.0);
+		
+		\node[azul, font=\small, align=center] at (4.0, 4.2)
+		{alta informaci\'{o}n\\cerca de $1$};
+		\draw[azul, ->, thin] (4.0, 3.8) -- (4.4, 3.0);
+		
+		\node[rojo, font=\small, align=center] at (2.5, 1.2)
+		{m\'{i}nimo en\\$p = 0.5$};
+		
+	\end{tikzpicture}
+	\caption{Informaci\'{o}n de Fisher $\mathcal{I}(p) =
+		1/(p(1-p))$ para $X \sim \mathrm{Bernoulli}(p)$. La
+		informaci\'{o}n es m\'{a}xima cerca de los extremos $p=0$
+		y $p=1$ --- donde los datos son m\'{a}s reveladores sobre
+		$p$ --- y m\'{i}nima en $p=0.5$, donde la variable es
+		m\'{a}xximamente impredecible.}
+	\label{fig:fisher_bernoulli}
+\end{figure}
+
+\begin{observacion}
+	Para una muestra aleatoria de tama\~{n}o $n$, la
+	informaci\'{o}n de Fisher total es
+	\[
+	\mathcal{I}_n(\theta_0) = n\,\mathcal{I}(\theta_0).
+	\]
+	Es decir, la informaci\'{o}n se acumula linealmente
+	con el tama\~{n}o muestral --- duplicar la muestra
+	duplica la informaci\'{o}n disponible sobre $\theta_0$.
+	Esta propiedad es consecuencia directa de la
+	independencia de las observaciones.
+\end{observacion}
+
+\section{Teorema de Cram\'{e}r-Rao}
+\label{sec:cramer_rao}
+
+Tenemos ahora todas las herramientas necesarias para
+responder las preguntas que dejamos abiertas al final de
+la Secci\'{o}n~\ref{sec:propiedades_estimadores}: ¿existe
+una cota absoluta para la varianza de cualquier estimador
+insesgado? ¿De qu\'{e} depende? El Teorema de
+Cram\'{e}r-Rao responde ambas con precisi\'{o}n.
+
+Antes de enunciarlo, recordamos un resultado cl\'{a}sico
+que usaremos en la demostraci\'{o}n.
+
+\begin{observacion}
+	La \textbf{desigualdad de Cauchy-Schwarz} establece
+	que para dos variables aleatorias $U$ y $V$ con
+	varianza finita:
+	\[
+	\mathrm{Cov}(U, V)^2 \leq
+	\mathrm{Var}(U)\cdot\mathrm{Var}(V).
+	\]
+	Es la versi\'{o}n probabil\'{i}stica de un resultado
+	general que vale en cualquier espacio con producto
+	interno --- el mismo que se aplica en $\mathbb{R}^n$
+	para vectores. Aqu\'{i} el producto interno entre
+	dos variables aleatorias $U$ y $V$ es $E(UV)$, y la
+	desigualdad dice que la covarianza no puede superar
+	el producto de las desviaciones est\'{a}ndar.
+\end{observacion}
+
+\begin{teorema}{Teorema de Cram\'{e}r-Rao}{cramer_rao}
+	Sea $X_1, \ldots, X_n$ una muestra aleatoria de
+	$P_{\theta_0}$ y sea $\hat{\theta}$ un estimador
+	insesgado de $\theta_0$. Bajo condiciones de
+	regularidad,
+	\[
+	\mathrm{Var}_{\theta_0}(\hat{\theta})
+	\geq \frac{1}{n\,\mathcal{I}(\theta_0)}.
+	\]
+	La cantidad $1/(n\,\mathcal{I}(\theta_0))$ se denomina
+	\textbf{cota de Cram\'{e}r-Rao}.
+\end{teorema}
+
+\begin{proof}
+	La demostraci\'{o}n tiene tres pasos.
+	
+	\medskip
+	\textbf{Paso 1 --- Una identidad clave.}
+	Mostraremos que
+	\[
+	\mathrm{Cov}_{\theta_0}(\hat{\theta},\,
+	s(\theta_0)) = 1.
+	\]
+	Como $\hat{\theta}$ es insesgado,
+	$E_{\theta_0}(\hat{\theta}) = \theta_0$ para todo
+	$\theta_0 \in \Theta$. Diferenciando respecto a
+	$\theta_0$ e intercambiando derivada e integral
+	(condiciones de regularidad):
+	\[
+	\frac{\partial}{\partial\theta_0}
+	\int \hat{\theta}(x_1,\ldots,x_n)\,
+	\prod_{i=1}^n p_{\theta_0}(x_i)\,dx_i = 1.
+	\]
+	Aplicando la regla de la cadena al integrando y
+	usando que $\frac{\partial}{\partial\theta_0}
+	\ln L(\theta_0) = s(\theta_0)$:
+	\[
+	\int \hat{\theta}(x_1,\ldots,x_n)\cdot
+	s(\theta_0)\cdot\prod_{i=1}^n
+	p_{\theta_0}(x_i)\,dx_i = 1,
+	\]
+	es decir, $E_{\theta_0}[\hat{\theta}\cdot
+	s(\theta_0)] = 1$. Como $E_{\theta_0}[s(\theta_0)]
+	= 0$ por la
+	Proposici\'{o}n~\ref{prop:score_media_cero}:
+	\[
+	\mathrm{Cov}_{\theta_0}(\hat{\theta},\,
+	s(\theta_0))
+	= E_{\theta_0}[\hat{\theta}\cdot s(\theta_0)]
+	- E_{\theta_0}[\hat{\theta}]\cdot
+	E_{\theta_0}[s(\theta_0)]
+	= 1 - \theta_0 \cdot 0 = 1.
+	\]
+	
+	\medskip
+	\textbf{Paso 2 --- Desigualdad de Cauchy-Schwarz.}
+	Aplicando la desigualdad de Cauchy-Schwarz a
+	$\hat{\theta}$ y $s(\theta_0)$:
+	\[
+	\mathrm{Cov}_{\theta_0}(\hat{\theta},\,
+	s(\theta_0))^2 \leq
+	\mathrm{Var}_{\theta_0}(\hat{\theta})\cdot
+	\mathrm{Var}_{\theta_0}(s(\theta_0)).
+	\]
+	
+	\medskip
+	\textbf{Paso 3 --- Combinar.}
+	Sustituyendo el Paso 1 en el lado izquierdo y la
+	definici\'{o}n de informaci\'{o}n de Fisher
+	$\mathcal{I}_n(\theta_0) = n\,\mathcal{I}(\theta_0)
+	= \mathrm{Var}_{\theta_0}(s(\theta_0))$ en el
+	lado derecho:
+	\[
+	1 \leq \mathrm{Var}_{\theta_0}(\hat{\theta})
+	\cdot n\,\mathcal{I}(\theta_0).
+	\]
+	Despejando:
+	\[
+	\mathrm{Var}_{\theta_0}(\hat{\theta}) \geq
+	\frac{1}{n\,\mathcal{I}(\theta_0)}. \qedhere
+	\]
+\end{proof}
+
+\begin{observacion}
+	El teorema responde las tres preguntas abiertas:
+	\begin{enumerate}[label=\textbf{\roman*)}]
+		\item \textbf{¿Existe una cota absoluta?} Sí:
+		$1/(n\,\mathcal{I}(\theta_0))$.
+		\item \textbf{¿De qu\'{e} depende?} De la
+		informaci\'{o}n de Fisher --- cuanto m\'{a}s
+		informativa sea la muestra sobre $\theta_0$,
+		menor es la cota y m\'{a}s preciso puede ser
+		el estimador. Con m\'{a}s datos ($n$ mayor),
+		la cota decrece como $1/n$.
+		\item \textbf{¿Hay un estimador que la alcance?}
+		Se dice que un estimador insesgado que alcanza
+		la cota es \textbf{eficiente} en sentido
+		absoluto. No siempre existe, pero cuando existe
+		es el \'{o}ptimo indiscutible dentro de la
+		clase de estimadores insesgados.
+	\end{enumerate}
+\end{observacion}
+
+\begin{observacion}
+	Cram\'{e}r-Rao justifica retroactivamente por qu\'{e}
+	la varianza es el criterio correcto para comparar
+	estimadores insesgados: no es una elecci\'{o}n
+	arbitraria, sino la consecuencia de que existe una
+	cota natural expresada en t\'{e}rminos de varianza.
+	Comparar varianzas no es solo conveniente --- es lo
+	\'{u}nico que tiene sentido dado este resultado.
+\end{observacion}
+
+\section{Por qu\'{e} estas propiedades y no otras}
+
+Al definir insesgadez, eficiencia y consistencia en la
+Secci\'{o}n~\ref{sec:propiedades_estimadores}, las
+presentamos como criterios razonables para evaluar
+estimadores. Pero ``razonable'' no es una justificaci\'{o}n
+matem\'{a}tica. Ahora que tenemos el Teorema de
+Cram\'{e}r-Rao, podemos responder con precisi\'{o}n por
+qu\'{e} estas tres propiedades y no otras.
+
+\subsection{Por qu\'{e} la insesgadez}
+
+El Teorema de Cram\'{e}r-Rao establece una cota inferior
+para la varianza de cualquier estimador
+\textbf{insesgado}. Esto no es accidental --- la
+demostraci\'{o}n us\'{o} de manera esencial que
+$E_{\theta_0}(\hat{\theta}) = \theta_0$: fue precisamente
+esa condici\'{o}n la que permiti\'{o} derivar la identidad
+$\mathrm{Cov}_{\theta_0}(\hat{\theta}, s(\theta_0)) = 1$
+en el Paso~1 de la demostraci\'{o}n.
+
+Sin insesgadez, esa identidad no vale y la cota
+desaparece. Esto tiene una consecuencia importante: si
+permitimos estimadores sesgados, el problema de encontrar
+el ``mejor'' estimador se vuelve mal planteado --- siempre
+es posible reducir la varianza introduciendo sesgo, y no
+hay un l\'{i}mite natural que diga cu\'{a}ndo parar.
+
+La insesgadez no es una propiedad arbitraria. Es la
+condici\'{o}n que hace que el problema de optimizaci\'{o}n
+est\'{e} bien planteado: delimita la clase de estimadores
+dentro de la cual existe un l\'{i}mite absoluto de
+precisi\'{o}n, y por lo tanto dentro de la cual tiene
+sentido hablar de un estimador \'{o}ptimo.
+
+\subsection{Por qu\'{e} la eficiencia}
+
+Dentro de la clase de estimadores insesgados,
+Cram\'{e}r-Rao demuestra que la varianza satisface:
+\[
+\mathrm{Var}_{\theta_0}(\hat{\theta}) \geq
+\frac{1}{n\,\mathcal{I}(\theta_0)}.
+\]
+Esto significa que la varianza tiene una cota inferior
+\textbf{absoluta} --- no relativa a otro estimador, sino
+fijada por la cantidad de informaci\'{o}n que los datos
+contienen sobre $\theta_0$. Comparar varianzas entre
+estimadores insesgados no es una elecci\'{o}n arbitraria:
+es lo \'{u}nico que tiene sentido dado que existe ese
+l\'{i}mite natural expresado en t\'{e}rminos de varianza.
+
+M\'{a}s a\'{u}n, el teorema define impl\'{i}citamente
+qu\'{e} significa ser \'{o}ptimo en sentido absoluto: un
+estimador insesgado que alcanza la cota de Cram\'{e}r-Rao
+es eficiente en el sentido m\'{a}s fuerte posible --- no
+hay ning\'{u}n estimador insesgado que pueda superarlo,
+independientemente de cu\'{a}n ingenioso sea su
+dise\~{n}o.
+
+\subsection{Por qu\'{e} la consistencia}
+
+La cota de Cram\'{e}r-Rao es $1/(n\,\mathcal{I}(\theta_0))$
+--- decrece como $1/n$ cuando el tama\~{n}o muestral
+crece. Esto revela algo fundamental: la precisi\'{o}n
+m\'{a}xima alcanzable mejora con m\'{a}s datos, y lo hace
+a una tasa bien definida. Un buen estimador deber\'{i}a
+aprovechar esa mejora --- su varianza deber\'{i}a decrecer
+al menos tan r\'{a}pido como la cota.
+
+La consistencia formaliza exactamente eso: exige que el
+estimador converja a $\theta_0$ cuando $n \to \infty$.
+Un estimador inconsistente no aprovecha la informaci\'{o}n
+adicional que proveen m\'{a}s datos --- su error no
+desaparece aunque la cota de Cram\'{e}r-Rao se acerque
+a cero. Es, en ese sentido, un estimador que desperdicia
+informaci\'{o}n.
+
+La consistencia no es una condici\'{o}n arbitraria de
+``mejora con m\'{a}s datos''. Es la condici\'{o}n m\'{i}nima
+para que un estimador sea compatible con lo que
+Cram\'{e}r-Rao garantiza que es posible lograr.
+
+\subsection{Las tres propiedades como sistema coherente}
+
+Las tres propiedades no son una lista arbitraria de
+criterios deseables. Son un sistema coherente donde
+cada una responde una pregunta precisa:
+
+\begin{center}
+	\begin{tabular}{lll}
+		\toprule
+		\textbf{Propiedad} & \textbf{Pregunta} &
+		\textbf{Justificaci\'{o}n} \\
+		\midrule
+		Insesgadez &
+		¿Apunta en la direcci\'{o}n correcta? &
+		Delimita la clase donde existe \'{o}ptimo \\[4pt]
+		Eficiencia &
+		¿Aprovecha la informaci\'{o}n? &
+		Cram\'{e}r-Rao fija el l\'{i}mite absoluto \\[4pt]
+		Consistencia &
+		¿Mejora con m\'{a}s datos? &
+		La cota decrece como $1/n$ \\
+		\bottomrule
+	\end{tabular}
+\end{center}
+
+\medskip
+Cram\'{e}r-Rao es el resultado que une las tres: muestra
+que dentro de la clase de estimadores insesgados existe
+un l\'{i}mite de precisi\'{o}n determinado por la
+informaci\'{o}n de Fisher, que ese l\'{i}mite mejora con
+m\'{a}s datos, y que un estimador \'{o}ptimo es aquel
+que lo alcanza. Insesgadez, eficiencia y consistencia
+son las tres caras de esa misma idea.
+
+\section{La media muestral como estimador \'{o}ptimo}
+
+A lo largo de este cap\'{i}tulo hemos construido un
+marco te\'{o}rico completo: definimos qu\'{e} es un
+estimador, establecimos las propiedades que debe cumplir
+un buen estimador, y demostramos con Cram\'{e}r-Rao que
+existe un l\'{i}mite absoluto de precisi\'{o}n determinado
+por la informaci\'{o}n de Fisher. Ahora aplicamos todo ese
+aparato al estimador m\'{a}s natural e importante de la
+estad\'{i}stica: la \textbf{media muestral}
+\[
+\bar{X} = \frac{1}{n}\sum_{i=1}^n X_i.
+\]
+Demostraremos que $\bar{X}$ no es solo un estimador
+conveniente --- es el estimador \'{o}ptimo dentro de la
+clase insesgada, en el sentido de que alcanza la cota de
+Cram\'{e}r-Rao.
+
+\begin{proposicion}{Insesgadez de la media muestral}
+	{xbar_insesgado}
+	Sea $X_1, \ldots, X_n$ una muestra aleatoria de una
+	poblaci\'{o}n con media $\mu$. Entonces
+	\[
+	E(\bar{X}) = \mu.
+	\]
+\end{proposicion}
+
+\begin{proof}
+	Por linealidad del valor esperado
+	(Proposici\'{o}n~\ref{prop:ev_lineal}):
+	\[
+	E(\bar{X})
+	= E\!\left(\frac{1}{n}\sum_{i=1}^n X_i\right)
+	= \frac{1}{n}\sum_{i=1}^n E(X_i)
+	= \frac{1}{n}\sum_{i=1}^n \mu
+	= \frac{1}{n}\cdot n\mu
+	= \mu. \qedhere
+	\]
+\end{proof}
+
+\begin{observacion}
+	La demostraci\'{o}n no asume ninguna distribuci\'{o}n
+	espec\'{i}fica para la poblaci\'{o}n --- solo que
+	$E(X_i) = \mu$. La insesgadez de $\bar{X}$ vale para
+	cualquier familia param\'{e}trica con media finita.
+\end{observacion}
+
+\begin{proposicion}{Varianza de la media muestral}{var_xbar}
+	Sea $X_1, \ldots, X_n$ una muestra aleatoria de una
+	poblaci\'{o}n con varianza $\sigma^2$. Entonces
+	\[
+	\mathrm{Var}(\bar{X}) = \frac{\sigma^2}{n}.
+	\]
+\end{proposicion}
+
+\begin{proof}
+	Por la aditividad de la varianza bajo independencia
+	(v\'{a}lida porque la muestra es i.i.d.):
+	\[
+	\mathrm{Var}(\bar{X})
+	= \mathrm{Var}\!\left(\frac{1}{n}
+	\sum_{i=1}^n X_i\right)
+	= \frac{1}{n^2}\sum_{i=1}^n \mathrm{Var}(X_i)
+	= \frac{1}{n^2}\cdot n\sigma^2
+	= \frac{\sigma^2}{n}. \qedhere
+	\]
+\end{proof}
+
+\begin{proposicion}{Eficiencia de $\bar{X}$ para la
+		familia Normal}{xbar_eficiente}
+	Sea $X_1, \ldots, X_n$ una muestra aleatoria de
+	$N(\mu, \sigma^2)$ con $\sigma^2$ conocido. Entonces
+	$\bar{X}$ alcanza la cota de Cram\'{e}r-Rao y es por
+	lo tanto el estimador insesgado de $\mu$ con menor
+	varianza posible.
+\end{proposicion}
+
+\begin{proof}
+	Calculamos la informaci\'{o}n de Fisher para la familia
+	$N(\mu, \sigma^2)$ con $\sigma^2$ conocido y $\theta
+	= \mu$. La log-densidad es:
+	\[
+	\ln p_\mu(x) = -\frac{1}{2}\ln(2\pi\sigma^2)
+	- \frac{(x-\mu)^2}{2\sigma^2}.
+	\]
+	La funci\'{o}n score es:
+	\[
+	\frac{\partial}{\partial\mu}\ln p_\mu(x)
+	= \frac{x - \mu}{\sigma^2}.
+	\]
+	La informaci\'{o}n de Fisher para una observaci\'{o}n:
+	\[
+	\mathcal{I}(\mu)
+	= E_\mu\!\left[\left(\frac{X-\mu}{\sigma^2}
+	\right)^2\right]
+	= \frac{1}{\sigma^4}\,\mathrm{Var}_\mu(X)
+	= \frac{1}{\sigma^4}\cdot\sigma^2
+	= \frac{1}{\sigma^2}.
+	\]
+	La cota de Cram\'{e}r-Rao para una muestra de
+	tama\~{n}o $n$ es:
+	\[
+	\frac{1}{n\,\mathcal{I}(\mu)}
+	= \frac{1}{n \cdot \frac{1}{\sigma^2}}
+	= \frac{\sigma^2}{n}.
+	\]
+	Por la Proposici\'{o}n~\ref{prop:var_xbar},
+	$\mathrm{Var}(\bar{X}) = \sigma^2/n$. Como la
+	varianza de $\bar{X}$ coincide exactamente con la
+	cota de Cram\'{e}r-Rao, $\bar{X}$ es el estimador
+	insesgado de $\mu$ con menor varianza posible.
+	\qedhere
+\end{proof}
+
+\begin{proposicion}{Consistencia de la media muestral}
+	{xbar_consistente}
+	Sea $X_1, \ldots, X_n$ una muestra aleatoria de una
+	poblaci\'{o}n con media $\mu$ y varianza $\sigma^2 
+	\infty$. Entonces $\bar{X}$ es consistente:
+	\[
+	\lim_{n\to\infty} P\!\left(|\bar{X} - \mu| >
+	\varepsilon\right) = 0
+	\qquad \text{para todo } \varepsilon > 0.
+	\]
+\end{proposicion}
+
+\begin{proof}
+	Aplicamos la desigualdad de Chebyshev al estimador
+	$\bar{X}$. Como $E(\bar{X}) = \mu$ y
+	$\mathrm{Var}(\bar{X}) = \sigma^2/n$:
+	\[
+	P\!\left(|\bar{X} - \mu| > \varepsilon\right)
+	\leq \frac{\mathrm{Var}(\bar{X})}{\varepsilon^2}
+	= \frac{\sigma^2}{n\varepsilon^2}.
+	\]
+	Cuando $n \to \infty$, el lado derecho converge a
+	cero para todo $\varepsilon > 0$ fijo. Por lo tanto:
+	\[
+	\lim_{n\to\infty} P\!\left(|\bar{X} - \mu| >
+	\varepsilon\right) = 0. \qedhere
+	\]
+\end{proof}
+
+\begin{observacion}
+	La consistencia de $\bar{X}$ es la \textbf{Ley D\'{e}bil
+		de los Grandes N\'{u}meros} --- uno de los resultados
+	m\'{a}s importantes de toda la probabilidad. Establece
+	que el promedio de una muestra aleatoria converge en
+	probabilidad a la media poblacional cuando el tama\~{n}o
+	muestral crece. La demostraci\'{o}n via Chebyshev que
+	presentamos aqu\'{i} es elemental pero completa ---
+	no requiere ning\'{u}n resultado adicional m\'{a}s all\'{a}
+	de lo que ya hemos desarrollado en este apunte.
+\end{observacion}
+
+Las cuatro proposiciones juntas establecen que $\bar{X}$
+cumple todo lo que el marco te\'{o}rico de este cap\'{i}tulo
+exige de un buen estimador --- y m\'{a}s: no solo es
+insesgado, eficiente y consistente, sino que es
+\textbf{\'{o}ptimo en sentido absoluto} para la familia
+Normal, en el sentido de que ningún estimador insesgado
+puede superarlo. Esto cierra el c\'{i}rculo: partimos de
+propiedades definidas emp\'{i}ricamente, las justificamos
+con Cram\'{e}r-Rao, y terminamos demostrando que el
+estimador m\'{a}s natural de todos las satisface todas
+--- y las satisface al m\'{a}ximo nivel posible.
+
+\section{Distribuci\'{o}n muestral y Teorema del
+	L\'{i}mite Central}
+
+En la secci\'{o}n anterior demostramos que $\bar{X}$
+tiene media $\mu$ y varianza $\sigma^2/n$. Pero conocer
+los primeros dos momentos no es suficiente para calcular
+probabilidades sobre $\bar{X}$ --- para eso necesitamos
+conocer su \textbf{distribuci\'{o}n completa}. La
+distribuci\'{o}n de probabilidad de un estad\'{i}stico
+recibe un nombre propio, y determinarla para $\bar{X}$
+es el objetivo de esta secci\'{o}n. La respuesta es el
+resultado m\'{a}s importante de toda la probabilidad.
+
+\begin{definicion}{Distribuci\'{o}n muestral}
+	{dist_muestral}
+	La \textbf{distribuci\'{o}n muestral} de un
+	estad\'{i}stico $T = g(X_1, \ldots, X_n)$ es la
+	distribuci\'{o}n de probabilidad de $T$ cuando
+	$X_1, \ldots, X_n$ es una muestra aleatoria de
+	$P_{\theta_0}$.
+\end{definicion}
+
+\begin{observacion}
+	La distribuci\'{o}n muestral no es la distribuci\'{o}n
+	de la poblaci\'{o}n --- es la distribuci\'{o}n del
+	estad\'{i}stico calculado sobre la muestra. Para un
+	mismo par\'{a}metro $\theta_0$, distintos estad\'{i}sticos
+	tienen distintas distribuciones muestrales. La
+	distribuci\'{o}n muestral de $\bar{X}$ responde la
+	pregunta: si tomara muchas muestras de tama\~{n}o $n$
+	y calculara $\bar{X}$ en cada una, ¿c\'{o}mo se
+	distribuir\'{i}an esos valores?
+\end{observacion}
+
+Ya sabemos que $E(\bar{X}) = \mu$ y
+$\mathrm{Var}(\bar{X}) = \sigma^2/n$ para cualquier
+poblaci\'{o}n con media $\mu$ y varianza $\sigma^2$.
+Pero ¿qu\'{e} \emph{forma} tiene la distribuci\'{o}n
+muestral de $\bar{X}$? La respuesta depende de la
+poblaci\'{o}n:
+
+\begin{itemize}[leftmargin=2em]
+	\item Si la poblaci\'{o}n es Normal, la distribuci\'{o}n
+	de $\bar{X}$ es exactamente Normal para cualquier $n$.
+	\item Si la poblaci\'{o}n \textbf{no} es Normal,
+	el Teorema del L\'{i}mite Central garantiza que la
+	distribuci\'{o}n de $\bar{X}$ se aproxima a una
+	Normal cuando $n$ crece.
+\end{itemize}
+
+\begin{observacion}
+	En el lenguaje formal de este cap\'{i}tulo, decir
+	que \textbf{la poblaci\'{o}n es Normal} significa
+	que la distribuci\'{o}n $P_{\theta_0}$ que gobierna
+	la variable de inter\'{e}s pertenece a la familia
+	param\'{e}trica $\mathcal{F} = \{N(\mu, \sigma^2) :
+	\mu \in \mathbb{R},\, \sigma^2 > 0\}$, es decir,
+	que cada observaci\'{o}n $X_i$ de la muestra
+	aleatoria sigue una distribuci\'{o}n Normal. Cuando
+	la poblaci\'{o}n \textbf{no} es Normal, $P_{\theta_0}$
+	pertenece a otra familia --- Uniforme, Exponencial,
+	Poisson, o cualquier otra --- y el TLC garantiza
+	que $\bar{X}$ converge a la Normal de todas formas,
+	independientemente de cu\'{a}l sea esa familia.
+\end{observacion}
+
+\begin{teorema}{Teorema del L\'{i}mite Central}{tlc}
+	Sea $X_1, X_2, \ldots, X_n$ una muestra aleatoria
+	con $E(X_i) = \mu$ y $\mathrm{Var}(X_i) = \sigma^2
+	< \infty$. Se define
+	\[
+	Z_n \coloneqq \frac{\displaystyle\sum_{i=1}^n
+		X_i - n\mu}{\sigma\sqrt{n}}.
+	\]
+	Entonces la funci\'{o}n de distribuci\'{o}n de $Z_n$
+	converge hacia la funci\'{o}n de distribuci\'{o}n
+	Normal est\'{a}ndar cuando $n \to \infty$:
+	\[
+	\lim_{n\to\infty} P(Z_n \leq z)
+	= \Phi(z)
+	= \int_{-\infty}^{z} \frac{1}{\sqrt{2\pi}}\,
+	e^{-t^2/2}\,dt
+	\qquad \text{para todo } z \in \mathbb{R}.
+	\]
+	Es equivalente escribirlo en funci\'{o}n de la media
+	muestral $\bar{X}$:
+	\[
+	Z_n = \frac{\bar{X} - \mu}{\sigma/\sqrt{n}},
+	\]
+	puesto que ambas expresiones difieren solo en dividir
+	numerador y denominador por $n$.
+\end{teorema}
+
+\begin{observacion}
+	El teorema no dice nada sobre la distribuci\'{o}n de
+	cada $X_i$ --- solo exige que existan su media y su
+	varianza. La convergencia a la Normal ocurre
+	independientemente de la forma de la distribuci\'{o}n
+	poblacional. En la pr\'{a}ctica, la aproximaci\'{o}n
+	$P(Z_n \leq z) \approx \Phi(z)$ es adecuada para
+	$n \geq 30$, aunque este umbral depende de cu\'{a}n
+	alejada est\'{e} la poblaci\'{o}n de la simetr\'{i}a.
+\end{observacion}
+
+\begin{observacion}
+	La demostraci\'{o}n del TLC requiere el concepto de
+	\textbf{funci\'{o}n caracter\'{i}stica}
+	$\varphi_X(t) = E[e^{itX}]$ --- la transformada de
+	Fourier de la distribuci\'{o}n de $X$ --- y el
+	resultado de que la convergencia de funciones
+	caracter\'{i}sticas implica convergencia en
+	distribuci\'{o}n. Estas herramientas pertenecen al
+	\'{a}mbito del an\'{a}lisis real y est\'{a}n fuera
+	del alcance de este curso. Lo que s\'{i} podemos
+	hacer es entender por qu\'{e} el resultado es
+	verdadero intuitivamente, y verificarlo en casos
+	particulares.
+\end{observacion}
+
+\begin{observacion}
+	El TLC es la respuesta a la pregunta que dejamos
+	abierta en el Tema~3 al estudiar la distribuci\'{o}n
+	Normal: ¿por qu\'{e} la Normal aparece en fen\'{o}menos
+	tan distintos como alturas, errores de medici\'{o}n
+	y precios financieros? La respuesta es que en todos
+	esos casos la variable observada es la suma --- o el
+	promedio --- de muchos factores independientes
+	peque\~{n}os. El TLC garantiza que esa suma converge
+	a una Normal independientemente de la distribuci\'{o}n
+	de los factores individuales. La Normal no aparece
+	por coincidencia --- aparece porque es el atractor
+	universal de las sumas de variables aleatorias
+	independientes.
+\end{observacion}
+
+Lo anterior implica adem\'{a}s que la suma
+$\sum_{i=1}^n X_i = n\bar{X}$ tambi\'{e}n se distribuye
+aproximadamente Normal:
+\[
+\sum_{i=1}^n X_i \approx N(n\mu,\, n\sigma^2)
+\qquad \text{para } n \geq 30.
+\]
+
+\begin{proposicion}{Caso exacto: poblaci\'{o}n Normal}
+	{tlc_exacto}
+	Si la poblaci\'{o}n es $N(\mu, \sigma^2)$, entonces
+	para \textbf{cualquier} $n$:
+	\[
+	\bar{X} \sim N\!\left(\mu,\,\frac{\sigma^2}{n}
+	\right)
+	\qquad \text{y} \qquad
+	\sum_{i=1}^n X_i \sim N(n\mu,\, n\sigma^2).
+	\]
+\end{proposicion}
+
+\begin{proof}
+	La suma de variables normales independientes es
+	normal --- resultado que se demuestra usando funciones
+	caracter\'{i}sticas o la propiedad de reproductividad
+	de la distribuci\'{o}n Normal. Espec\'{i}ficamente,
+	si $X_i \sim N(\mu, \sigma^2)$ i.i.d., entonces por
+	la propiedad de reproductividad:
+	\[
+	\sum_{i=1}^n X_i \sim N(n\mu,\, n\sigma^2).
+	\]
+	Dividiendo por $n$ y usando las propiedades de la
+	Normal bajo transformaciones afines
+	(Proposici\'{o}n~\ref{prop:estandarizacion}):
+	\[
+	\bar{X} = \frac{1}{n}\sum_{i=1}^n X_i
+	\sim N\!\left(\mu,\,\frac{\sigma^2}{n}\right).
+	\qedhere
+	\]
+\end{proof}
+
+\begin{observacion}
+	La diferencia entre el caso exacto y el TLC es
+	fundamental. Cuando la poblaci\'{o}n es Normal, la
+	distribuci\'{o}n de $\bar{X}$ es exactamente Normal
+	para cualquier $n$, incluso $n=1$. Cuando la
+	poblaci\'{o}n no es Normal, la distribuci\'{o}n de
+	$\bar{X}$ solo se \emph{aproxima} a la Normal, y
+	la aproximaci\'{o}n mejora con $n$. En la pr\'{a}ctica,
+	$n \geq 30$ suele ser suficiente para que la
+	aproximaci\'{o}n sea adecuada, aunque esto depende
+	de cu\'{a}n alejada est\'{e} la poblaci\'{o}n de
+	la simetr\'{i}a.
+\end{observacion}
+
+\begin{figure}[H]
+	\centering
+	\begin{tikzpicture}[scale=0.95]
+		
+		% Mostramos la distribución de Xbar para distintos n
+		% cuando la población es Uniforme(0,1): mu=0.5, sigma^2=1/12
+		% Xbar ~ N(0.5, 1/(12n)) aproximadamente por TLC
+		% sigma/sqrt(n) = 1/(sqrt(12)*sqrt(n)) = 0.2887/sqrt(n)
+		
+		\draw[thick,->] (-0.5,0) -- (10.5,0)
+		node[right] {$\bar{x}$};
+		\draw[thick,->] (0,-0.2) -- (0,5.5)
+		node[above] {$f(\bar{x})$};
+		
+		% Escala: x en [0,1] mapeado a [0,10]
+		% f escalada por 2 para visualización
+		
+		% n=1: Uniforme(0,1), densidad = 1, altura = 2
+		\fill[azul!10] (0,0) rectangle (10,2);
+		\draw[azul!40, very thick] (0,2) -- (10,2);
+		\node[azul!60, font=\scriptsize] at (8.5, 2.3) {$n=1$};
+		
+		% n=5: Normal(0.5, 1/60), sigma=0.1291
+		% sigma_plot = 0.1291*10 = 1.291
+		% altura pico = 2/(1.291*sqrt(2pi)) * 2 = 0.617*2 = ...
+		% usamos 0.3989/sigma_plot * escala
+		% escala = 2*10 = 20 (para que área = 1 en plot)
+		% altura = 0.3989/(0.1291) * 2 = 6.18 -- demasiado alto
+		% Usemos escala = 1 y multiplicamos por 2
+		\draw[azul!60, very thick, domain=0:10, samples=200]
+		plot (\x, {2*0.3989/1.291*exp(-(\x-5)^2/(2*1.291^2))});
+		\node[azul!70, font=\scriptsize] at (7.5, 0.9)
+		{$n=5$};
+		
+		% n=10: sigma_plot = 0.2887/sqrt(10)*10 = 0.9129
+		\draw[azul!80, very thick, domain=0:10, samples=200]
+		plot (\x, {2*0.3989/0.9129*exp(-(\x-5)^2/(2*0.9129^2))});
+		\node[azul!80, font=\scriptsize] at (6.8, 1.8)
+		{$n=10$};
+		
+		% n=30: sigma_plot = 0.2887/sqrt(30)*10 = 0.5270
+		\draw[azul, very thick, domain=0:10, samples=200]
+		plot (\x, {2*0.3989/0.5270*exp(-(\x-5)^2/(2*0.5270^2))});
+		\node[azul, font=\scriptsize] at (6.3, 3.2)
+		{$n=30$};
+		
+		% n=100: sigma_plot = 0.2887/sqrt(100)*10 = 0.2887
+		\draw[azul!80!black, very thick, domain=0:10, samples=200]
+		plot (\x, {2*0.3989/0.2887*exp(-(\x-5)^2/(2*0.2887^2))});
+		\node[azul!80!black, font=\scriptsize] at (6.0, 5.0)
+		{$n=100$};
+		
+		% Línea en la media mu=0.5 -> x=5
+		\draw[rojo, dashed, thick] (5,0) -- (5,5.3);
+		\node[rojo, above, font=\small] at (5, 5.3) {$\mu = 0.5$};
+		
+		% Etiquetas eje x
+		\foreach \x/\lbl in {0/0, 2.5/0.25, 5/0.5,
+			7.5/0.75, 10/1}{
+			\node[below, font=\scriptsize] at (\x,0) {$\lbl$};
+			\draw[thin] (\x,0.05) -- (\x,-0.05);
+		}
+		
+	\end{tikzpicture}
+	\caption{Distribuci\'{o}n muestral de $\bar{X}$ para
+		distintos tama\~{n}os de muestra $n$, cuando la poblaci\'{o}n
+		es $U(0,1)$ --- una distribuci\'{o}n completamente no
+		Normal (rect\'{a}ngulo). Para $n=1$, la distribuci\'{o}n
+		de $\bar{X}$ es la misma Uniforme. A medida que $n$ crece,
+		la distribuci\'{o}n se concentra alrededor de $\mu = 0.5$
+		y adquiere la forma de campana gaussiana. Para $n \geq 30$
+		la aproximaci\'{o}n Normal es adecuada.}
+	\label{fig:tlc}
+\end{figure}
+
+El Teorema del L\'{i}mite Central es la respuesta
+completa a la pregunta que dejamos abierta en el
+Tema~3: ¿por qu\'{e} la distribuci\'{o}n Normal
+aparece en fen\'{o}menos tan distintos como alturas,
+errores de medici\'{o}n y precios financieros? La
+respuesta no es que el mundo sea normal --- es que
+el mundo est\'{a} lleno de fen\'{o}menos que son
+sumas de muchos factores independientes peque\~{n}os,
+y el TLC garantiza que esas sumas convergen a la
+Normal sin importar la distribuci\'{o}n de cada
+factor individual. La altura de una persona es la
+suma de miles de factores gen\'{e}ticos y ambientales.
+El error de medici\'{o}n es la suma de miles de
+perturbaciones peque\~{n}as. El precio de una acci\'{o}n
+es la acumulaci\'{o}n de miles de decisiones
+independientes. En todos esos casos opera el TLC ---
+y produce la campana gaussiana. En t\'{e}rminos
+simples: \textbf{la distribuci\'{o}n Normal no es
+	un supuesto sobre el mundo, es una consecuencia
+	matem\'{a}tica inevitable de la independencia y
+	la acumulaci\'{o}n.}
 
 % ==========================================================
-\chapter{Introducci\'{o}n a la inferencia estad\'{\i}stica}
+\chapter{Introducci\'{o}n a la inferencia estad\'{i}stica}
+
+Todo el aparato que hemos construido --- variables
+aleatorias, distribuciones, estimadores, Teorema del
+L\'{i}mite Central --- ten\'{i}a un objetivo impl\'{i}cito:
+aprender algo sobre una poblaci\'{o}n a partir de una
+muestra. Hasta ahora ese aprendizaje tom\'{o} la forma
+de una \textbf{estimaci\'{o}n puntual}: dado un par\'{a}metro
+desconocido $\theta_0$, calculamos $\hat{\theta}$ como
+nuestra mejor aproximaci\'{o}n.
+
+Pero en la pr\'{a}ctica, la pregunta que enfrentan los
+tomadores de decisiones rara vez es ``¿cu\'{a}nto vale
+$\theta_0$?''. M\'{a}s frecuentemente es ``¿es $\theta_0$
+mayor que cierto umbral?'', ``¿cambi\'{o} $\theta_0$
+despu\'{e}s de una intervenci\'{o}n?'', o ``¿son
+compatibles los datos con cierta afirmaci\'{o}n sobre
+$\theta_0$?''. Esas son preguntas de \textbf{decisi\'{o}n},
+no de estimaci\'{o}n.
+
+La inferencia estad\'{i}stica provee dos herramientas
+para responderlas:
+
+\begin{center}
+	\begin{tabular}{ll}
+		\toprule
+		\textbf{Herramienta} & \textbf{Pregunta que responde} \\
+		\midrule
+		Test de hip\'{o}tesis &
+		¿Son los datos compatibles con cierta afirmaci\'{o}n
+		sobre $\theta_0$? \\[4pt]
+		Intervalo de confianza &
+		¿En qu\'{e} rango de valores es plausible que
+		est\'{e} $\theta_0$? \\
+		\bottomrule
+	\end{tabular}
+\end{center}
+
+\medskip
+Ambas herramientas est\'{a}n \'{i}ntimamente relacionadas
+--- un intervalo de confianza puede construirse a partir
+de un test de hip\'{o}tesis y viceversa. Las estudiaremos
+en orden.
+
+\section{Test de hip\'{o}tesis}
+
+Imaginemos que una empresa farmac\'{e}utica afirma que
+su nuevo medicamento reduce la presi\'{o}n arterial media
+a menos de 120 mmHg. Un regulador de salud quiere
+verificar esa afirmaci\'{o}n. No puede medir a toda la
+poblaci\'{o}n --- solo tiene acceso a una muestra. ¿C\'{o}mo
+usa esa muestra para tomar una decisi\'{o}n?
+
+La respuesta es el \textbf{test de hip\'{o}tesis}: un
+procedimiento formal para decidir, sobre la base de
+evidencia muestral, si una afirmaci\'{o}n sobre el
+par\'{a}metro poblacional es compatible con los datos
+o no.
+
+\subsection{Hip\'{o}tesis nula e hip\'{o}tesis alternativa}
+
+Todo test de hip\'{o}tesis parte de dos afirmaciones
+contrapuestas sobre el par\'{a}metro $\theta_0$.
+
+\begin{definicion}{Hip\'{o}tesis nula e hip\'{o}tesis
+		alternativa}{hipotesis}
+	La \textbf{hip\'{o}tesis nula} $H_0$ es la afirmaci\'{o}n
+	que se supone cierta inicialmente --- la posici\'{o}n
+	de referencia o \emph{statu quo}. La \textbf{hip\'{o}tesis
+		alternativa} $H_1$ es la afirmaci\'{o}n contradictoria
+	a $H_0$ que se desea detectar si los datos lo justifican.
+	
+	Si $\mu$ denota el par\'{a}metro de inter\'{e}s y
+	$\mu_0$ es un valor espec\'{i}fico llamado
+	\textbf{valor nulo}, la hip\'{o}tesis nula toma
+	la forma
+	\[
+	H_0: \mu = \mu_0,
+	\]
+	y la hip\'{o}tesis alternativa tiene una de las
+	tres formas:
+	\begin{enumerate}[label=\textbf{\arabic*.}]
+		\item $H_1: \mu \neq \mu_0$ \quad
+		(prueba \textbf{bilateral})
+		\item $H_1: \mu > \mu_0$ \quad
+		(prueba \textbf{unilateral derecha})
+		\item $H_1: \mu < \mu_0$ \quad
+		(prueba \textbf{unilateral izquierda})
+	\end{enumerate}
+\end{definicion}
+
+\begin{observacion}
+	En el lenguaje formal del Cap\'{i}tulo~4, la
+	hip\'{o}tesis nula $H_0: \mu = \mu_0$ afirma que
+	el verdadero par\'{a}metro es $\theta_0 = \mu_0$.
+	El test de hip\'{o}tesis pregunta: ¿son los datos
+	compatibles con esa afirmaci\'{o}n, o constituyen
+	evidencia suficiente para rechazarla?
+\end{observacion}
+
+\subsection{La l\'{o}gica del test: por qu\'{e} partimos
+	de $H_0$}
+
+La estructura del test de hip\'{o}tesis --- partir de
+$H_0$ y buscar evidencia para rechazarla, nunca para
+``probarla'' --- no es una convenci\'{o}n arbitraria.
+Tiene ra\'{i}ces profundas en la filosof\'{i}a de la
+ciencia, espec\'{i}ficamente en el \textbf{falsacionismo}
+del fil\'{o}sofo austr\'{i}aco Karl Popper (1902--1994).
+
+\subsubsection{El problema de la inducci\'{o}n}
+
+Durante siglos, la ciencia opero bajo la l\'{o}gica
+\textbf{inductiva}: observar muchos casos favorables
+y concluir que una ley general es verdadera. Si veo
+mil cisnes blancos, induzco que ``todos los cisnes son
+blancos''. El problema --- se\~{n}alado ya por David
+Hume en el siglo XVIII --- es que ninguna cantidad
+finita de observaciones favorables puede \emph{probar}
+una afirmaci\'{o}n universal. Siempre podr\'{i}a existir
+un contraejemplo no observado a\'{u}n.
+
+Y en efecto: cuando los europeos llegaron a Australia,
+encontraron cisnes negros. Mil observaciones favorables
+no bastaron.
+
+\subsubsection{La soluci\'{o}n de Popper: falsabilidad}
+
+Popper propuso invertir la l\'{o}gica. En lugar de
+buscar confirmaciones, la ciencia deber\'{i}a buscar
+\textbf{refutaciones}. Una afirmaci\'{o}n cient\'{i}fica
+v\'{a}lida no es aquella que puede confirmarse, sino
+aquella que puede \emph{falsarse} --- es decir, aquella
+para la que existe al menos un experimento concebible
+que podr\'{i}a demostrar que es falsa.
+
+La asimetr\'{i}a es crucial:
+
+\begin{itemize}[leftmargin=2em]
+	\item \textbf{Confirmar} requiere infinitas
+	observaciones favorables --- nunca se puede
+	estar seguro.
+	\item \textbf{Refutar} requiere una sola
+	observaci\'{o}n contradictoria --- y eso s\'{i}
+	es definitivo.
+\end{itemize}
+
+Por eso Popper argument\'{o} que la ciencia avanza
+\textbf{descartando hip\'{o}tesis}, no confirm\'{a}ndolas.
+Una teor\'{i}a que no puede refutarse en principio ---
+que es compatible con cualquier observaci\'{o}n posible
+--- no es cient\'{i}fica. Es infalsable, y por lo tanto
+vac\'{i}a de contenido emp\'{i}rico.
+
+\subsubsection{De Popper al test de hip\'{o}tesis}
+
+El test de hip\'{o}tesis opera exactamente con esa
+l\'{o}gica. La hip\'{o}tesis nula $H_0$ juega el papel
+de la teor\'{i}a que queremos intentar refutar:
+
+\begin{enumerate}[label=\textbf{\arabic*.}]
+	\item \textbf{Asumimos $H_0$ como verdadera} ---
+	el \emph{statu quo} que ponemos a prueba. No
+	porque creamos que es verdadera, sino porque es
+	la posici\'{o}n que la evidencia debe superar.
+	
+	\item \textbf{Calculamos qu\'{e} tan probable
+		ser\'{i}a observar los datos que tenemos si
+		$H_0$ fuera cierta}. Si esa probabilidad es
+	muy peque\~{n}a, los datos son incompatibles
+	con $H_0$.
+	
+	\item \textbf{Si la probabilidad es suficientemente
+		peque\~{n}a, rechazamos $H_0$} --- al igual que
+	Popper refuta una teor\'{i}a con un contraejemplo,
+	rechazamos $H_0$ porque los datos son demasiado
+	improbables bajo ella.
+	
+	\item \textbf{Si la probabilidad no es peque\~{n}a,
+		no rechazamos $H_0$} --- pero esto \textbf{no
+		significa que $H_0$ sea verdadera}. Solo significa
+	que los datos no proporcionan evidencia suficiente
+	para descartarla. Exactamente como en Popper: la
+	ausencia de refutaci\'{o}n no es confirmaci\'{o}n.
+\end{enumerate}
+
+\begin{observacion}
+	La distinci\'{o}n entre ``no rechazar $H_0$'' y
+	``aceptar $H_0$'' es una de las m\'{a}s importantes
+	--- y m\'{a}s frecuentemente violadas --- de toda
+	la estad\'{i}stica aplicada. Un test que no rechaza
+	$H_0$ no ha ``probado'' nada: solo ha constatado
+	que la evidencia disponible es insuficiente para
+	refutarla. Puede que $H_0$ sea falsa y la muestra
+	simplemente demasiado peque\~{n}a para detectarlo.
+	En la jerga estad\'{i}stica, esto se expresa
+	diciendo que el test tiene \textbf{baja potencia}
+	--- un concepto que estudiaremos m\'{a}s adelante.
+	
+	La confusi\'{o}n entre ambas es directamente
+	popperiana: creer que la ausencia de refutaci\'{o}n
+	implica confirmaci\'{o}n es el error inductivo que
+	Popper pas\'{o} su vida criticando.
+\end{observacion}
+
+\begin{observacion}
+	El falsacionismo tambi\'{e}n explica por qu\'{e}
+	$H_0$ toma siempre la forma de una \textbf{igualdad}
+	$\mu = \mu_0$ y no de una desigualdad. Una igualdad
+	es m\'{a}s f\'{a}cil de refutar --- define un punto
+	preciso en el espacio param\'{e}trico, y cualquier
+	alejamiento suficiente de ese punto constituye
+	evidencia en su contra. Una hip\'{o}tesis nula
+	de la forma $\mu \geq \mu_0$ ser\'{i}a m\'{a}s
+	dif\'{i}cil de tratar formalmente porque no define
+	un \'{u}nico valor bajo el cual calcular
+	probabilidades.
+\end{observacion}
+
+\subsection{Errores en el test de hip\'{o}tesis}
+
+Al tomar una decisi\'{o}n basada en una muestra ---
+y no en la poblaci\'{o}n completa --- siempre existe
+la posibilidad de equivocarse. Hay exactamente dos
+formas de cometer un error.
+
+\begin{definicion}{Error de tipo I y error de tipo II}
+	{errores}
+	Un \textbf{error de tipo I} consiste en rechazar
+	$H_0$ cuando $H_0$ es verdadera. Un \textbf{error
+		de tipo II} consiste en no rechazar $H_0$ cuando
+	$H_0$ es falsa.
+	
+	Sus probabilidades se denotan:
+	\[
+	P(\text{error tipo I}) = \alpha, \qquad
+	P(\text{error tipo II}) = \beta.
+	\]
+	El par\'{a}metro $\alpha$ se denomina \textbf{nivel
+		de significancia} del test.
+\end{definicion}
+
+\begin{table}[H]
+	\centering
+	\begin{tabular}{lccc}
+		\toprule
+		& & \multicolumn{2}{c}{\textbf{Realidad}} \\
+		\cmidrule(lr){3-4}
+		& & $H_0$ verdadera & $H_0$ falsa \\
+		\midrule
+		\multirow{2}{*}{\textbf{Decisi\'{o}n}} &
+		No rechazar $H_0$ &
+		\cellcolor{verde!20} Sin error &
+		\cellcolor{rojo!20} Error tipo II ($\beta$) \\[6pt]
+		& Rechazar $H_0$ &
+		\cellcolor{rojo!20} Error tipo I ($\alpha$) &
+		\cellcolor{verde!20} Sin error \\
+		\bottomrule
+	\end{tabular}
+	\caption{Los cuatro posibles resultados de un test de
+		hip\'{o}tesis. Solo dos de ellos constituyen errores.}
+	\label{tab:errores}
+\end{table}
+
+\begin{observacion}
+	Existe una \textbf{tensi\'{o}n fundamental} entre
+	los dos tipos de error: reducir $\alpha$ ---
+	ser m\'{a}s exigente para rechazar $H_0$ ---
+	inevitablemente aumenta $\beta$, y viceversa.
+	No es posible minimizar ambos simult\'{a}neamente
+	con una muestra de tama\~{n}o fijo. La \'{u}nica
+	forma de reducir ambos a la vez es \textbf{aumentar
+		$n$} --- con m\'{a}s datos, la evidencia es m\'{a}s
+	precisa y ambos errores pueden controlarse mejor.
+	
+	La convenci\'{o}n est\'{a}ndar en la pr\'{a}ctica
+	es fijar $\alpha$ en un valor peque\~{n}o ---
+	t\'{i}picamente $0.05$ o $0.01$ --- y dise\~{n}ar
+	el test de modo que $\alpha$ no supere ese umbral.
+	Esto refleja la asimetr\'{i}a popperiana: se es
+	m\'{a}s cuidadoso con rechazar $H_0$ err\'{o}neamente
+	que con no detectar una alternativa verdadera.
+\end{observacion}
 
 \section{Estimaci\'{o}n por intervalos de confianza}
 
