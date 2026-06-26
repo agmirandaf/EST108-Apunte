@@ -37,7 +37,7 @@
 % ── GRÁFICOS ──────────────────────────────────────────────
 \usepackage{tikz}
 \usepackage{pgfplots}
-\usetikzlibrary{patterns}
+\usetikzlibrary{patterns, positioning}
 \pgfplotsset{compat=1.18}
 
 % ── HIPERVÍNCULOS ─────────────────────────────────────────
@@ -117,6 +117,15 @@
     separator sign={\ ---\ },
 }{prop}
 
+\newtcbtheorem[number within=chapter]{corolario}{Corolario}{
+	enhanced, breakable,
+	colback=green!10, colframe=green!50!black,
+	fonttitle=\bfseries\color{white}, coltitle=white,
+	attach boxed title to top left={yshift=-2mm, xshift=6mm},
+	boxed title style={colback=green!50!black, rounded corners},
+	separator sign={\ ---\ },
+}{cor}
+
 \newenvironment{observacion}{%
     \par\medskip\noindent\textbf{\color{azul}Observaci\'{o}n.}\enspace\itshape
 }{\par\medskip}
@@ -175,6 +184,20 @@
     \vfill
     {\small Basado en el material de la profesora Florencia Darrigrandi.}
 \end{titlepage}
+
+\newpage
+\thispagestyle{empty}
+\vspace*{\fill}
+\begin{center}
+	{\large\itshape «La matem\'{a}tica es aquello mediante lo cual
+		los hombres gobiernan la naturaleza y a s\'{i} mismos.»}
+	
+	\bigskip
+	{\normalsize --- Andr\'{e}i N. Kolmog\'{o}rov}\\[4pt]
+	{\small Matem\'{a}tico sovi\'{e}tico (1903--1987)}
+\end{center}
+\vspace*{\fill}
+\newpage
 
 \tableofcontents
 \clearpage
@@ -5584,11 +5607,11 @@ contrapuestas sobre el par\'{a}metro $\theta_0$.
 	tres formas:
 	\begin{enumerate}[label=\textbf{\arabic*.}]
 		\item $H_1: \mu \neq \mu_0$ \quad
-		(prueba \textbf{bilateral})
+		(prueba \textbf{de las dos colas})
 		\item $H_1: \mu > \mu_0$ \quad
-		(prueba \textbf{unilateral derecha})
+		(prueba \textbf{de cola superior})
 		\item $H_1: \mu < \mu_0$ \quad
-		(prueba \textbf{unilateral izquierda})
+		(prueba \textbf{de cola inferior})
 	\end{enumerate}
 \end{definicion}
 
@@ -5743,6 +5766,19 @@ formas de cometer un error.
 		de significancia} del test.
 \end{definicion}
 
+El nivel de significancia $\alpha$ no es un
+par\'{a}metro matem\'{a}tico neutro --- es una
+\textbf{decisi\'{o}n humana} que refleja cu\'{a}n
+conservador quiere ser el investigador. Fijar
+$\alpha = 0{,}05$ significa: ``acepto un 5\% de
+probabilidad de rechazar $H_0$ cuando es verdadera''.
+Fijar $\alpha = 0{,}01$ es m\'{a}s exigente: solo
+se tolera un 1\% de ese error. Cuanto m\'{a}s
+peque\~{n}o sea $\alpha$, m\'{a}s dif\'{i}cil
+ser\'{a} rechazar $H_0$ --- y por lo tanto
+m\'{a}s s\'{o}lida ser\'{a} la evidencia requerida
+para hacerlo.
+
 \begin{table}[H]
 	\centering
 	\begin{tabular}{lccc}
@@ -5777,23 +5813,1619 @@ formas de cometer un error.
 	precisa y ambos errores pueden controlarse mejor.
 	
 	La convenci\'{o}n est\'{a}ndar en la pr\'{a}ctica
-	es fijar $\alpha$ en un valor peque\~{n}o ---
-	t\'{i}picamente $0.05$ o $0.01$ --- y dise\~{n}ar
-	el test de modo que $\alpha$ no supere ese umbral.
-	Esto refleja la asimetr\'{i}a popperiana: se es
-	m\'{a}s cuidadoso con rechazar $H_0$ err\'{o}neamente
-	que con no detectar una alternativa verdadera.
+	es fijar $\alpha = 0{,}05$ o $\alpha = 0{,}01$.
+	Esta convenci\'{o}n no tiene ning\'{u}n fundamento
+	matem\'{a}tico especial --- es un est\'{a}ndar que
+	se impuso en la pr\'{a}ctica cient\'{i}fica del
+	siglo XX, en gran parte por influencia de Fisher.
+	Muchos estad\'{i}sticos modernos critican el uso
+	mec\'{a}nico de ese umbral, argumentando que la
+	decisi\'{o}n deber\'{i}a depender del contexto:
+	el costo relativo de los errores tipo~I y tipo~II
+	var\'{i}a seg\'{u}n el problema. Esto refleja
+	adem\'{a}s la asimetr\'{i}a popperiana: se es
+	m\'{a}s cuidadoso con rechazar $H_0$
+	err\'{o}neamente que con no detectar una
+	alternativa verdadera.
 \end{observacion}
 
-\section{Estimaci\'{o}n por intervalos de confianza}
-
+% ==========================================================
 \section{Pruebas de hip\'{o}tesis}
 
+Con la arquitectura conceptual del test establecida
+--- la l\'{o}gica de Popper, los errores de tipo~I
+y~II, el nivel de significancia $\alpha$ --- el
+siguiente paso es traducirla en un protocolo
+operacional. La estad\'{i}stica aplicada exige que
+el investigador fije todos sus criterios
+\emph{antes} de observar los datos: de lo
+contrario, siempre existe la tentaci\'{o}n de
+ajustar las reglas para que los datos ``salgan
+bien''. El procedimiento de cinco pasos convierte
+la l\'{o}gica falsacionista en acciones concretas
+y reproducibles.
+
+% ----------------------------------------------------------
 \subsection{El procedimiento de cinco pasos}
 
-\subsection{Prueba para la media con varianza conocida}
+\begin{enumerate}[label=\textbf{Paso \arabic*.},
+	leftmargin=*, itemsep=6pt]
+	
+	\item \textbf{Formular las hip\'{o}tesis nula
+		y alternativa.} Se establece $H_0$ como la
+	posici\'{o}n que se someter\'{a} a prueba ---
+	siempre una igualdad $\mu = \mu_0$ --- y $H_1$
+	como la alternativa que se aceptar\'{a} si
+	$H_0$ es rechazada.
+	
+	La forma de $H_1$ no se determina
+	matem\'{a}ticamente sino a partir del
+	\textbf{contexto del problema}. La pregunta
+	que gu\'{i}a la elecci\'{o}n es: \emph{¿qu\'{e}
+		tipo de desviaci\'{o}n de $H_0$ ser\'{i}a
+		relevante para el investigador?}
+	\begin{itemize}[leftmargin=2em]
+		\item Si el objetivo es verificar si un
+		valor supuesto es correcto, sin direcci\'{o}n
+		de sospecha prefijada $\longrightarrow$
+		$H_1: \mu \neq \mu_0$, prueba de dos colas.
+		\item Si hay razones previas para sospechar
+		que el par\'{a}metro es \emph{mayor} que el
+		supuesto $\longrightarrow$ $H_1: \mu > \mu_0$,
+		prueba de cola superior.
+		\item Si hay razones previas para sospechar
+		que el par\'{a}metro es \emph{menor} que el
+		supuesto $\longrightarrow$ $H_1: \mu < \mu_0$,
+		prueba de cola inferior.
+	\end{itemize}
+	Esta elecci\'{o}n debe hacerse \textbf{antes
+		de observar los datos} --- elegir $H_1$ despu\'{e}s
+	de ver $\bar{x}$ invalida el nivel $\alpha$
+	fijado en el Paso~2, pues equivale a ajustar
+	las reglas del juego a la conveniencia.
+	
+	\item \textbf{Seleccionar el nivel de
+		significancia $\alpha$.} Es la probabilidad
+	m\'{a}xima de error tipo~I que se est\'{a}
+	dispuesto a tolerar. Debe fijarse antes de
+	observar los datos --- fijarla despu\'{e}s
+	equivale a ajustar las reglas del juego a la
+	conveniencia. Los valores convencionales son
+	$\alpha = 0{,}05$ y $\alpha = 0{,}01$.
+	
+	\item \textbf{Identificar el estad\'{i}stico
+		de prueba.} Se elige una funci\'{o}n de los
+	datos cuya distribuci\'{o}n bajo $H_0$ es
+	conocida. Es esa distribuci\'{o}n la que
+	permite calcular probabilidades y construir
+	la regi\'{o}n cr\'{i}tica. La elecci\'{o}n
+	depende del par\'{a}metro bajo prueba y de
+	los supuestos disponibles sobre la poblaci\'{o}n.
+	
+	\item \textbf{Formular la regla de decisi\'{o}n.}
+	Se delimita la \textbf{regi\'{o}n cr\'{i}tica}
+	--- el conjunto de valores del estad\'{i}stico
+	que llevar\'{i}an a rechazar $H_0$ ---
+	construida de modo que
+	\[
+	P\!\left(\text{estad\'{i}stico} \in
+	\text{regi\'{o}n cr\'{i}tica}
+	\mid H_0 \text{ verdadera}\right) = \alpha.
+	\]
+	Esta regla queda fijada antes de tomar la
+	muestra.
+	
+	\item \textbf{Tomar la muestra y decidir.}
+	Se calcula el valor observado del
+	estad\'{i}stico y se verifica si cae dentro
+	o fuera de la regi\'{o}n cr\'{i}tica. La
+	decisi\'{o}n es binaria: \emph{rechazar
+		$H_0$} o \emph{no rechazar $H_0$}.
+	
+\end{enumerate}
 
-\subsection{Prueba para la media con varianza desconocida}
+\begin{figure}[H]
+	\centering
+	\begin{tikzpicture}[
+		node distance = 0.5cm and 0.15cm,
+		box/.style = {
+			rectangle, rounded corners = 3pt,
+			draw = NavyBlue, fill = NavyBlue!10,
+			text width = 1.95cm, align = center,
+			minimum height = 1.4cm, font = \small
+		},
+		lbl/.style = {
+			font = \footnotesize\itshape,
+			text = gray, align = center
+		},
+		arr/.style = {->, thick, draw = NavyBlue!60}
+		]
+		\node[box] (p1) {Formular\\$H_0$ y $H_1$};
+		\node[box, right = of p1] (p2) {Fijar\\$\alpha$};
+		\node[box, right = of p2] (p3) {Elegir\\estad\'{\i}stico};
+		\node[box, right = of p3] (p4) {Regi\'{o}n\\cr\'{\i}tica};
+		\node[box, right = of p4] (p5) {Muestra\\y decisi\'{o}n};
+		
+		\draw[arr] (p1) -- (p2);
+		\draw[arr] (p2) -- (p3);
+		\draw[arr] (p3) -- (p4);
+		\draw[arr] (p4) -- (p5);
+		
+		\node[lbl, below = 0.2cm of p1] {Paso 1};
+		\node[lbl, below = 0.2cm of p2] {Paso 2};
+		\node[lbl, below = 0.2cm of p3] {Paso 3};
+		\node[lbl, below = 0.2cm of p4] {Paso 4};
+		\node[lbl, below = 0.2cm of p5] {Paso 5};
+		
+	\end{tikzpicture}
+	\caption{El procedimiento de cinco pasos para
+		probar una hip\'{o}tesis.}
+	\label{fig:cinco-pasos}
+\end{figure}
+
+% ----------------------------------------------------------
+\subsection{Prueba $Z$: media con varianza conocida}
+
+El procedimiento de cinco pasos es un esqueleto
+vac\'{i}o hasta que se especifica un estad\'{i}stico
+concreto en el Paso~3. La elecci\'{o}n del
+estad\'{i}stico no es arbitraria --- depende de dos
+factores: el \textbf{par\'{a}metro que se est\'{a}
+	probando} y los \textbf{supuestos disponibles} sobre
+la poblaci\'{o}n. El principio que gu\'{i}a la
+elecci\'{o}n es siempre el mismo: se busca una
+funci\'{o}n de los datos cuya distribuci\'{o}n bajo
+$H_0$ sea completamente conocida, pues solo as\'{i}
+es posible calcular probabilidades y construir la
+regi\'{o}n cr\'{i}tica.
+
+El primer caso --- y el m\'{a}s transparente
+matem\'{a}ticamente --- es el de una poblaci\'{o}n
+normal con varianza $\sigma^2$ conocida. Bajo
+$H_0: \mu = \mu_0$, sabemos que $\bar{X}$ sigue
+una distribuci\'{o}n normal con media $\mu_0$ y
+varianza $\sigma^2/n$. Estandarizando $\bar{X}$
+obtenemos un estad\'{i}stico con distribuci\'{o}n
+$N(0,1)$ exacta bajo $H_0$ --- sin aproximaciones
+ni supuestos adicionales. Ese estad\'{i}stico es
+$Z_0$, y a la prueba que lo usa se la denomina
+\textbf{prueba $Z$}.
+
+\begin{proposicion}{Distribuci\'{o}n del estad\'{i}stico
+		$Z_0$ bajo $H_0$}{dist-z0}
+	Sea $X_1, X_2, \ldots, X_n$ una muestra
+	aleatoria de una poblaci\'{o}n
+	$N(\mu, \sigma^2)$ con $\sigma^2$ conocida.
+	Bajo la hip\'{o}tesis nula $H_0: \mu = \mu_0$,
+	el estad\'{i}stico
+	\[
+	Z_0 = \frac{\bar{X} - \mu_0}{\sigma /
+		\sqrt{n}}
+	\]
+	sigue una distribuci\'{o}n normal est\'{a}ndar:
+	\[
+	Z_0 \sim N(0, 1).
+	\]
+\end{proposicion}
+
+\begin{proof}
+	Por la proposici\'{o}n~\ref{prop:tlc_exacto},
+	la media muestral satisface
+	\[
+	\bar{X} \sim N\!\left(\mu,
+	\frac{\sigma^2}{n}\right).
+	\]
+	Bajo $H_0: \mu = \mu_0$, esto se convierte en
+	\[
+	\bar{X} \sim N\!\left(\mu_0,
+	\frac{\sigma^2}{n}\right).
+	\]
+	Aplicando la estandarizaci\'{o}n de la
+	distribuci\'{o}n normal --- si
+	$X \sim N(\mu, \sigma^2)$ entonces
+	$(X - \mu)/\sigma \sim N(0,1)$ --- con
+	$\mu = \mu_0$ y $\sigma^2$ reemplazada por
+	$\sigma^2/n$:
+	\[
+	Z_0 = \frac{\bar{X} - \mu_0}{\sigma /
+		\sqrt{n}} \sim N(0, 1). \qedhere
+	\]
+\end{proof}
+
+Una vez que $Z_0$ est\'{a} calculado, la decisi\'{o}n
+de rechazar o no $H_0$ depende de la forma de la
+hip\'{o}tesis alternativa $H_1$. En todos los casos
+la regi\'{o}n cr\'{i}tica se construye imponiendo
+la misma condici\'{o}n: que su probabilidad bajo
+$H_0$ sea exactamente $\alpha$. Como $Z_0 \sim
+N(0,1)$ bajo $H_0$, esto se traduce en encontrar
+el umbral $c$ tal que la probabilidad de que $Z_0$
+caiga en la regi\'{o}n de rechazo sea $\alpha$.
+
+\medskip
+\textbf{Cola superior} ($H_1: \mu > \mu_0$).
+Valores grandes de $Z_0$ son evidencia a favor
+de $H_1$, por lo que la regi\'{o}n cr\'{i}tica
+est\'{a} en la cola derecha. Imponemos:
+\[
+P(Z_0 > c \mid H_0) = \alpha
+\implies 1 - \Phi(c) = \alpha
+\implies \Phi(c) = 1 - \alpha
+\implies c = z_{1-\alpha}.
+\]
+Se rechaza $H_0$ si $Z_0 > z_{1-\alpha}$.
+
+\medskip
+\textbf{Cola inferior} ($H_1: \mu < \mu_0$).
+Valores peque\~{n}os de $Z_0$ son evidencia a
+favor de $H_1$, por lo que la regi\'{o}n
+cr\'{i}tica est\'{a} en la cola izquierda.
+Por simetr\'{i}a de la $N(0,1)$:
+\[
+P(Z_0 < c \mid H_0) = \alpha
+\implies \Phi(c) = \alpha
+\implies c = -z_{1-\alpha}.
+\]
+Se rechaza $H_0$ si $Z_0 < -z_{1-\alpha}$.
+
+\medskip
+\textbf{Dos colas} ($H_1: \mu \neq \mu_0$).
+Tanto valores muy grandes como muy peque\~{n}os
+de $Z_0$ son evidencia a favor de $H_1$. El nivel
+$\alpha$ se reparte en partes iguales entre ambas
+colas --- $\alpha/2$ en cada una --- para mantener
+la probabilidad total de rechazo bajo $H_0$
+igual a $\alpha$:
+\[
+P(|Z_0| > c \mid H_0) = \alpha
+\implies P(Z_0 > c) + P(Z_0 < -c) = \alpha
+\implies 2(1 - \Phi(c)) = \alpha
+\implies c = z_{1-\alpha/2}.
+\]
+Se rechaza $H_0$ si $|Z_0| > z_{1-\alpha/2}$.
+
+\begin{table}[H]
+	\centering
+	\begin{tabular}{lll}
+		\toprule
+		\textbf{Hip\'{o}tesis alternativa $H_1$} &
+		\textbf{Regi\'{o}n cr\'{i}tica} &
+		\textbf{Tipo de prueba} \\
+		\midrule
+		$\mu > \mu_0$ &
+		$Z_0 > z_{1-\alpha}$ &
+		Cola superior \\[4pt]
+		$\mu < \mu_0$ &
+		$Z_0 < -z_{1-\alpha}$ &
+		Cola inferior \\[4pt]
+		$\mu \neq \mu_0$ &
+		$|Z_0| > z_{1-\alpha/2}$ &
+		Dos colas \\
+		\bottomrule
+	\end{tabular}
+	\caption{Regiones de rechazo para la prueba $Z$
+		seg\'{u}n la hip\'{o}tesis alternativa.}
+	\label{tab:regiones-z}
+\end{table}
+
+\begin{definicion}{Valor cr\'{i}tico}{valor-critico}
+	El \textbf{valor cr\'{i}tico} de un test es el
+	umbral $c$ que delimita la regi\'{o}n cr\'{i}tica.
+	Se obtiene despejando $c$ de la condici\'{o}n
+	\[
+	P(\text{rechazo} \mid H_0) = \alpha,
+	\]
+	que es exactamente lo que hicimos en las
+	derivaciones anteriores. Su valor depende de
+	$\alpha$ y del tipo de prueba:
+	\begin{itemize}[leftmargin=2em]
+		\item Cola superior: $c = z_{1-\alpha}$,
+		pues $\Phi(z_{1-\alpha}) = 1-\alpha$.
+		\item Cola inferior: $c = -z_{1-\alpha}$,
+		por simetr\'{i}a de la $N(0,1)$.
+		\item Dos colas: $c = z_{1-\alpha/2}$,
+		pues el $\alpha$ se reparte en $\alpha/2$
+		en cada cola.
+	\end{itemize}
+	Los valores cr\'{i}ticos m\'{a}s usados en la
+	pr\'{a}ctica son:
+	\[
+	z_{0{,}95} = 1{,}645 \quad (\alpha = 0{,}10),
+	\qquad
+	z_{0{,}975} = 1{,}960 \quad (\alpha = 0{,}05),
+	\]
+	\[
+	z_{0{,}99} = 2{,}326 \quad (\alpha = 0{,}01).
+	\]
+\end{definicion}
+
+% --- figura cola superior ---
+\begin{figure}[H]
+	\centering
+	\begin{tikzpicture}
+		\begin{axis}[
+			width = 10cm, height = 5cm,
+			domain = -3.8:3.8,
+			samples = 200,
+			axis lines = left,
+			xlabel = {$z$},
+			ylabel = {},
+			xtick = {1.645},
+			xticklabels = {$z_{1-\alpha}$},
+			ytick = \empty,
+			ymin = 0, ymax = 0.45,
+			axis line style = {draw = gray!60},
+			tick style = {draw = gray!60},
+			every axis x label/.style = {
+				at = {(axis cs: 3.8, 0)},
+				anchor = west, font = \small
+			}
+			]
+			% curva normal
+			\addplot[thick, NavyBlue, smooth]
+			{exp(-x^2/2) / sqrt(2*pi)};
+			
+			% region critica cola superior
+			\addplot[
+			fill = red!25, opacity = 0.8,
+			draw = none, domain = 1.645:3.8
+			] {exp(-x^2/2) / sqrt(2*pi)} \closedcycle;
+			
+			% linea vertical
+			\addplot[dashed, gray, thick]
+			coordinates {(1.645, 0) (1.645, 0.105)};
+			
+			% etiqueta region critica
+			\node[font=\small, text=red!70!black]
+			at (axis cs: 2.5, 0.15) {$\alpha$};
+			
+		\end{axis}
+	\end{tikzpicture}
+	\caption{Regi\'{o}n cr\'{i}tica para la prueba de
+		cola superior: se rechaza $H_0$ si
+		$Z_0 > z_{1-\alpha}$.}
+	\label{fig:cola-superior}
+\end{figure}
+
+% --- figura cola inferior ---
+\begin{figure}[H]
+	\centering
+	\begin{tikzpicture}
+		\begin{axis}[
+			width = 10cm, height = 5cm,
+			domain = -3.8:3.8,
+			samples = 200,
+			axis lines = left,
+			xlabel = {$z$},
+			ylabel = {},
+			xtick = {-1.645},
+			xticklabels = {$-z_{1-\alpha}$},
+			ytick = \empty,
+			ymin = 0, ymax = 0.45,
+			axis line style = {draw = gray!60},
+			tick style = {draw = gray!60},
+			every axis x label/.style = {
+				at = {(axis cs: 3.8, 0)},
+				anchor = west, font = \small
+			}
+			]
+			\addplot[thick, NavyBlue, smooth]
+			{exp(-x^2/2) / sqrt(2*pi)};
+			
+			\addplot[
+			fill = red!25, opacity = 0.8,
+			draw = none, domain = -3.8:-1.645
+			] {exp(-x^2/2) / sqrt(2*pi)} \closedcycle;
+			
+			\addplot[dashed, gray, thick]
+			coordinates {(-1.645, 0) (-1.645, 0.105)};
+			
+			\node[font=\small, text=red!70!black]
+			at (axis cs: -2.5, 0.15) {$\alpha$};
+			
+		\end{axis}
+	\end{tikzpicture}
+	\caption{Regi\'{o}n cr\'{i}tica para la prueba de
+		cola inferior: se rechaza $H_0$ si
+		$Z_0 < -z_{1-\alpha}$.}
+	\label{fig:cola-inferior}
+\end{figure}
+
+% --- figura dos colas ---
+\begin{figure}[H]
+	\centering
+	\begin{tikzpicture}
+		\begin{axis}[
+			width = 10cm, height = 5cm,
+			domain = -3.8:3.8,
+			samples = 200,
+			axis lines = left,
+			xlabel = {$z$},
+			ylabel = {},
+			xtick = {-1.96, 1.96},
+			xticklabels = {$-z_{1-\alpha/2}$,
+				$z_{1-\alpha/2}$},
+			ytick = \empty,
+			ymin = 0, ymax = 0.45,
+			axis line style = {draw = gray!60},
+			tick style = {draw = gray!60},
+			every axis x label/.style = {
+				at = {(axis cs: 3.8, 0)},
+				anchor = west, font = \small
+			}
+			]
+			\addplot[thick, NavyBlue, smooth]
+			{exp(-x^2/2) / sqrt(2*pi)};
+			
+			\addplot[
+			fill = red!25, opacity = 0.8,
+			draw = none, domain = -3.8:-1.96
+			] {exp(-x^2/2) / sqrt(2*pi)} \closedcycle;
+			
+			\addplot[
+			fill = red!25, opacity = 0.8,
+			draw = none, domain = 1.96:3.8
+			] {exp(-x^2/2) / sqrt(2*pi)} \closedcycle;
+			
+			\addplot[dashed, gray, thick]
+			coordinates {(-1.96, 0) (-1.96, 0.058)};
+			\addplot[dashed, gray, thick]
+			coordinates {(1.96, 0) (1.96, 0.058)};
+			
+			\node[font=\small, text=red!70!black]
+			at (axis cs: -2.7, 0.12) {$\alpha/2$};
+			\node[font=\small, text=red!70!black]
+			at (axis cs: 2.7, 0.12) {$\alpha/2$};
+			
+		\end{axis}
+	\end{tikzpicture}
+	\caption{Regi\'{o}n cr\'{i}tica para la prueba de
+		dos colas: se rechaza $H_0$ si
+		$|Z_0| > z_{1-\alpha/2}$.}
+	\label{fig:dos-colas}
+\end{figure}
+
+\begin{observacion}
+	La notaci\'{o}n $z_{1-\alpha}$ denota el
+	percentil $1 - \alpha$ de la distribuci\'{o}n
+	normal est\'{a}ndar, es decir, el valor tal que
+	\[
+	P(Z \leq z_{1-\alpha}) = 1 - \alpha,
+	\qquad Z \sim N(0,1).
+	\]
+	Por simetr\'{i}a de la distribuci\'{o}n normal
+	est\'{a}ndar se tiene adem\'{a}s que
+	$z_\alpha = -z_{1-\alpha}$, lo que permite
+	expresar la regi\'{o}n cr\'{i}tica de cola
+	inferior en t\'{e}rminos del mismo percentil.
+	Los valores m\'{a}s usados en la pr\'{a}ctica
+	son:
+	\[
+	z_{0{,}95} = 1{,}645, \qquad
+	z_{0{,}975} = 1{,}960, \qquad
+	z_{0{,}99} = 2{,}326.
+	\]
+\end{observacion}
+
+\begin{ejemplo}{Prueba $Z$ para la media: cl\'{i}nica
+		Buena Salud}{clinica}
+	
+	Una cl\'{i}nica supone que el tiempo medio que los
+	pacientes pasan en sala de espera es $\mu_0 = 9$
+	minutos. Para verificar ese supuesto se toma una
+	muestra aleatoria de $n = 120$ personas, obteniendo
+	una media muestral de $\bar{x} = 10{,}2$ minutos.
+	Los tiempos se distribuyen normalmente con varianza
+	conocida $\sigma^2 = 16\ \text{min}^2$.
+	
+	La pregunta es: ¿es el supuesto de la cl\'{i}nica
+	compatible con los datos observados, o la
+	discrepancia entre $\bar{x} = 10{,}2$ y
+	$\mu_0 = 9$ es demasiado grande para ser atribuida
+	al azar del muestreo? Aplicamos el procedimiento
+	de cinco pasos.
+	
+	\medskip
+	\textbf{Paso 1. Hip\'{o}tesis.}
+	
+	La cl\'{i}nica quiere verificar si la media es
+	exactamente $9$ minutos --- no tiene una direcci\'{o}n
+	prefijada de desviaci\'{o}n. Por lo tanto la prueba
+	es de dos colas:
+	\[
+	H_0: \mu = 9 \qquad \text{vs} \qquad
+	H_1: \mu \neq 9.
+	\]
+	
+	\medskip
+	\textbf{Paso 2. Nivel de significancia.}
+	
+	Se fija $\alpha = 0{,}05$.
+	
+	\medskip
+	\textbf{Paso 3. Estad\'{i}stico de prueba.}
+	
+	La poblaci\'{o}n es normal y $\sigma^2 = 16$ es
+	conocida, por lo que corresponde usar la prueba
+	$Z$. El estad\'{i}stico es:
+	\[
+	Z_0 = \frac{\bar{X} - \mu_0}{\sigma/\sqrt{n}}
+	= \frac{\bar{X} - 9}{4/\sqrt{120}}.
+	\]
+	
+	\medskip
+	\textbf{Paso 4. Regi\'{o}n cr\'{i}tica.}
+	
+	La prueba es de dos colas, por lo que el valor
+	cr\'{i}tico es $c = z_{1-\alpha/2}$
+	(Definici\'{o}n~\ref{def:valor-critico}). Este
+	valor no es una elecci\'{o}n arbitraria: es el
+	\'{u}nico umbral que garantiza que la probabilidad
+	de cometer un error tipo~I sea exactamente
+	$\alpha$. En efecto, bajo $H_0$ se tiene
+	$Z_0 \sim N(0,1)$, y para que
+	$P(|Z_0| > c \mid H_0) = 0{,}05$ se necesita:
+	\[
+	2(1 - \Phi(c)) = 0{,}05
+	\implies \Phi(c) = 0{,}975
+	\implies c = z_{0{,}975} = 1{,}960.
+	\]
+	Cualquier otro valor de $c$ dar\'{i}a una
+	probabilidad de error tipo~I distinta de $0{,}05$,
+	violando el nivel de significancia fijado en el
+	Paso~2. La regi\'{o}n cr\'{i}tica es por lo tanto:
+	\[
+	|Z_0| > 1{,}960,
+	\]
+	es decir, se rechaza $H_0$ si el estad\'{i}stico
+	cae en alguna de las dos colas sombreadas en la
+	Figura~\ref{fig:dos-colas}. En caso contrario
+	--- si $-1{,}960 \leq Z_0 \leq 1{,}960$ --- no
+	se rechaza $H_0$.
+	
+	\medskip
+	\textbf{Paso 5. Muestra y decisi\'{o}n.}
+	
+	Con los datos observados $\bar{x} = 10{,}2$:
+	\[
+	z_0 = \frac{10{,}2 - 9}{4/\sqrt{120}}
+	= \frac{1{,}2}{0{,}3651}
+	= 3{,}286.
+	\]
+	Como $|z_0| = 3{,}286 > 1{,}960$, el valor
+	observado cae dentro de la regi\'{o}n cr\'{i}tica.
+	
+	\medskip
+	\textbf{Conclusi\'{o}n.} Se rechaza $H_0$ con
+	nivel de significancia $\alpha = 0{,}05$. Los
+	datos proporcionan evidencia suficiente para
+	concluir que el tiempo medio en sala de espera
+	no es $9$ minutos --- la discrepancia observada
+	es demasiado grande para ser atribuida al azar
+	del muestreo.
+	
+\end{ejemplo}
+
+% ----------------------------------------------------------
+
+\section{El valor $p$}
+
+El procedimiento de regi\'{o}n cr\'{i}tica tiene
+una limitaci\'{o}n pr\'{a}ctica: la decisi\'{o}n
+depende del $\alpha$ que se fij\'{o} en el Paso~2.
+Si dos investigadores analizan los mismos datos
+con $\alpha = 0{,}05$ y $\alpha = 0{,}01$
+respectivamente, podr\'{i}an llegar a conclusiones
+distintas --- y ninguno de los dos sabr\'{i}a
+cu\'{a}n ``cerca'' estuvo el estad\'{i}stico del
+umbral de rechazo.
+
+El \textbf{valor $p$} resuelve esto. En lugar de
+preguntar ``¿cae $Z_0$ en la regi\'{o}n cr\'{i}tica
+para este $\alpha$?'', pregunta algo m\'{a}s
+informativo: ¿cu\'{a}l es el nivel de significancia
+m\'{i}nimo para el cual estos datos llevar\'{i}an
+a rechazar $H_0$? Equivalentemente, el valor $p$
+mide cu\'{a}n incompatibles son los datos con
+$H_0$: un valor $p$ peque\~{n}o indica que los
+datos observados ser\'{i}an muy improbables si
+$H_0$ fuera cierta.
+
+\begin{definicion}{Valor $p$}{valor-p}
+	El \textbf{valor $p$} es la probabilidad,
+	bajo $H_0$, de obtener un valor del
+	estad\'{i}stico de prueba tan extremo o
+	m\'{a}s extremo que el valor observado $z_0$.
+	Formalmente:
+	\[
+	p = P(Z_0 \in R_{z_0} \mid H_0),
+	\]
+	donde $R_{z_0}$ denota la regi\'{o}n del
+	espacio muestral que es al menos tan extrema
+	como $z_0$ en la direcci\'{o}n de $H_1$.
+	Un valor $p$ peque\~{n}o indica que los datos
+	observados ser\'{i}an muy improbables si $H_0$
+	fuera cierta.
+\end{definicion}
+
+La intuici\'{o}n es simple. Imagina que lanzas
+una moneda 100 veces y obtienes 95 caras. El
+valor $p$ ser\'{i}a la probabilidad de obtener
+95 o m\'{a}s caras \emph{si la moneda fuera
+	justa}. Esa probabilidad es \'{i}nfima ---
+lo que sugiere fuertemente que la moneda no
+es justa. En general:
+\begin{itemize}[leftmargin=2em]
+	\item $p$ \textbf{grande} $\to$ lo que
+	observaste no ser\'{i}a raro bajo $H_0$.
+	No hay conflicto con $H_0$.
+	\item $p$ \textbf{peque\~{n}o} $\to$ lo que
+	observaste ser\'{i}a rar\'{i}simo bajo $H_0$.
+	Los datos son incompatibles con $H_0$.
+\end{itemize}
+
+\begin{proposicion}{F\'{o}rmulas del valor $p$
+		para la prueba $Z$}{formulas-p}
+	Bajo $H_0$, con $Z_0 \sim N(0,1)$ y valor
+	observado $z_0$, el valor $p$ se calcula como:
+	\[
+	\text{valor } p = \begin{cases}
+		1 - \Phi(z_0)      & \text{cola superior}
+		\; (H_1: \mu > \mu_0), \\[4pt]
+		\Phi(z_0)          & \text{cola inferior}
+		\; (H_1: \mu < \mu_0), \\[4pt]
+		2(1-\Phi(|z_0|))   & \text{dos colas}
+		\; (H_1: \mu \neq \mu_0).
+	\end{cases}
+	\]
+\end{proposicion}
+
+\begin{proof}
+	En todos los casos aplicamos directamente la
+	Definici\'{o}n~\ref{def:valor-p}: el valor $p$
+	es la probabilidad, bajo $H_0$, de obtener un
+	estad\'{i}stico tan extremo o m\'{a}s extremo
+	que el observado $z_0$.
+	
+	\medskip
+	\textbf{Cola superior.} Valores de $Z_0$
+	mayores que $z_0$ son evidencia a\'{u}n m\'{a}s
+	fuerte contra $H_0$ que el propio $z_0$. Por
+	lo tanto:
+	\[
+	p = P(Z \geq z_0 \mid H_0)
+	= 1 - P(Z < z_0 \mid H_0)
+	= 1 - \Phi(z_0).
+	\]
+	
+	\medskip
+	\textbf{Cola inferior.} Valores de $Z_0$
+	menores que $z_0$ son evidencia a\'{u}n m\'{a}s
+	fuerte contra $H_0$. Por lo tanto:
+	\[
+	p = P(Z \leq z_0 \mid H_0)
+	= \Phi(z_0).
+	\]
+	
+	\medskip
+	\textbf{Dos colas.} Tanto valores muy grandes
+	como muy peque\~{n}os de $Z_0$ son evidencia
+	contra $H_0$. La regi\'{o}n ``tan extrema o
+	m\'{a}s'' que $z_0$ es $\{|Z| \geq |z_0|\}$.
+	Por simetr\'{i}a de la $N(0,1)$:
+	\[
+	p = P(|Z| \geq |z_0| \mid H_0)
+	= P(Z \geq |z_0|) + P(Z \leq -|z_0|)
+	= 2\,P(Z \geq |z_0|)
+	= 2(1 - \Phi(|z_0|)). \qedhere
+	\]
+\end{proof}
+
+La regla de decisi\'{o}n es simple: se rechaza
+$H_0$ si $p \leq \alpha$. Esto no es un nuevo
+criterio --- es el mismo criterio de la
+regi\'{o}n cr\'{i}tica, expresado de forma
+distinta.
+
+\begin{proposicion}{Equivalencia entre valor $p$
+		y regi\'{o}n cr\'{i}tica}{equiv-p}
+	Para la prueba $Z$, los siguientes criterios
+	son equivalentes:
+	\begin{enumerate}[label=\textit{\roman*.}]
+		\item $Z_0$ cae en la regi\'{o}n cr\'{i}tica.
+		\item $\text{valor } p \leq \alpha$.
+	\end{enumerate}
+\end{proposicion}
+
+\begin{proof}
+	Demostramos el caso de cola superior; los
+	dem\'{a}s son an\'{a}logos. La regi\'{o}n
+	cr\'{i}tica es $Z_0 > z_{1-\alpha}$, y el
+	valor $p$ es $1 - \Phi(z_0)$. Como $\Phi$
+	es estrictamente creciente:
+	\[
+	z_0 > z_{1-\alpha}
+	\iff \Phi(z_0) > \Phi(z_{1-\alpha})
+	= 1 - \alpha
+	\iff 1 - \Phi(z_0) < \alpha
+	\iff p < \alpha.
+	\]
+	An\'{a}logamente para cola inferior y dos
+	colas. \qedhere
+\end{proof}
+
+\begin{corolario}{Rechazo para cualquier $\alpha
+		\geq p$}{rechazo-alfa}
+	Se rechaza $H_0$ para todo nivel de
+	significancia $\alpha \geq p$, y no se
+	rechaza para todo $\alpha < p$.
+\end{corolario}
+
+\begin{proof}
+	Sea $\alpha^*$ un nivel de significancia
+	arbitrario. Por la
+	Proposici\'{o}n~\ref{prop:equiv-p}, rechazar
+	$H_0$ con nivel $\alpha^*$ es equivalente
+	a que $p \leq \alpha^*$. Por lo tanto:
+	\[
+	\alpha^* \geq p
+	\iff p \leq \alpha^*
+	\iff \text{se rechaza } H_0
+	\text{ con nivel } \alpha^*.
+	\]
+	An\'{a}logamente, $\alpha^* < p \iff$ no
+	se rechaza $H_0$ con nivel $\alpha^*$.
+	\qedhere
+\end{proof}
+
+\begin{observacion}
+	Esto hace al valor $p$ m\'{a}s informativo
+	que la simple decisi\'{o}n binaria de la
+	regi\'{o}n cr\'{i}tica: en lugar de decir
+	``se rechaza con $\alpha = 0{,}05$'', el
+	valor $p$ dice ``se rechazar\'{i}a para
+	cualquier $\alpha \geq 0{,}001$'', lo que
+	permite al lector juzgar la solidez de la
+	evidencia con su propio criterio.
+\end{observacion}
+
+\begin{observacion}
+	El valor $p$ \textbf{no} es la probabilidad
+	de que $H_0$ sea verdadera, ni la probabilidad
+	de haber cometido un error. Es la probabilidad
+	de observar datos tan extremos como los
+	obtenidos, \emph{asumiendo} que $H_0$ es
+	verdadera. Esta distinci\'{o}n es una de las
+	m\'{a}s frecuentemente mal interpretadas en
+	la estad\'{i}stica aplicada.
+\end{observacion}
+
+Volviendo al ejemplo de la cl\'{i}nica, calculemos
+el valor $p$ correspondiente al estad\'{i}stico
+observado $z_0 = 3{,}286$.
+
+\medskip
+\textbf{Continuaci\'{o}n del ejemplo
+	\ref{ej:clinica}.}
+
+Como la prueba es de dos colas:
+\[
+p = 2(1 - \Phi(|z_0|))
+= 2(1 - \Phi(3{,}286))
+= 2(1 - 0{,}9995)
+= 2 \times 0{,}0005
+= 0{,}001.
+\]
+Como $p = 0{,}001 \leq 0{,}05 = \alpha$, se
+rechaza $H_0$ --- la misma conclusi\'{o}n que
+obtuvimos con la regi\'{o}n cr\'{i}tica, como
+garantiza la Proposici\'{o}n~\ref{prop:equiv-p}.
+
+Adem\'{a}s, el valor $p$ es m\'{a}s informativo
+que la simple decisi\'{o}n de rechazo: indica
+que $H_0$ ser\'{i}a rechazada para cualquier
+nivel de significancia $\alpha \geq 0{,}001$
+--- un resultado extremadamente s\'{o}lido.
+
+% ==========================================================
+\section{Prueba $t$: media con varianza desconocida}
+
+La prueba $Z$ resuelve el problema de testear
+$\mu$ cuando $\sigma^2$ es conocida. Pero en la
+pr\'{a}ctica, $\sigma^2$ casi nunca se conoce
+--- si se conociera, en muchos casos tambi\'{e}n
+se conocer\'{i}a $\mu$. El escenario realista es
+que ambos par\'{a}metros sean desconocidos y
+deban inferirse a partir de los datos.
+
+El paso natural es reemplazar $\sigma$ por un
+estimador construido desde la muestra. Pero esa
+sustituci\'{o}n tiene un costo: el estad\'{i}stico
+resultante ya no sigue una $N(0,1)$ bajo $H_0$,
+sino una distribuci\'{o}n con colas m\'{a}s
+pesadas --- la $t$-Student. Para construir ese
+estimador correctamente, primero necesitamos
+definirlo con precisi\'{o}n.
+
+% ----------------------------------------------------------
+\subsection{La varianza muestral}
+
+La varianza poblacional $\sigma^2$ mide la
+dispersi\'{o}n de la poblaci\'{o}n respecto a
+su media $\mu$. Cuando $\mu$ es desconocida,
+no podemos calcular $\sigma^2$ directamente
+--- pero s\'{i} podemos estimarla usando la
+dispersi\'{o}n de la muestra respecto a
+$\bar{X}$.
+
+La candidata natural ser\'{i}a promediar las
+desviaciones cuadr\'{a}ticas con $n$ en el
+denominador. Pero eso produce un estimador
+sesgado --- sistem\'{a}ticamente subestima
+$\sigma^2$. La correcci\'{o}n es dividir por
+$n-1$, y la raz\'{o}n de esa correcci\'{o}n
+emerge directamente de la demostraci\'{o}n
+del insesgamiento.
+
+\begin{definicion}{Varianza muestral y
+		desviaci\'{o}n est\'{a}ndar muestral}
+	{varianza-muestral}
+	Sea $X_1, X_2, \ldots, X_n$ una muestra
+	aleatoria. La \textbf{varianza muestral}
+	se define como:
+	\[
+	S^2 = \frac{1}{n-1}
+	\sum_{i=1}^{n}(X_i - \bar{X})^2.
+	\]
+	La \textbf{desviaci\'{o}n est\'{a}ndar
+		muestral} es $S = \sqrt{S^2}$.
+\end{definicion}
+
+\begin{proposicion}{Insesgamiento de $S^2$}
+	{insesgamiento-s2}
+	Sea $X_1, X_2, \ldots, X_n$ una muestra
+	aleatoria de una poblaci\'{o}n con media
+	$\mu$ y varianza $\sigma^2$. Entonces:
+	\[
+	E(S^2) = \sigma^2.
+	\]
+	Es decir, $S^2$ es un estimador insesgado
+	de $\sigma^2$.
+\end{proposicion}
+
+\begin{proof}
+	Partimos expandiendo la suma definitoria
+	de $S^2$. Notemos que:
+	\[
+	\sum_{i=1}^{n}(X_i - \bar{X})^2
+	= \sum_{i=1}^{n} X_i^2
+	- n\bar{X}^2.
+	\]
+	Tomando esperanza a ambos lados:
+	\[
+	E\!\left[\sum_{i=1}^{n}
+	(X_i - \bar{X})^2\right]
+	= \sum_{i=1}^{n} E(X_i^2)
+	- n\,E(\bar{X}^2).
+	\]
+	Usando que $E(X^2) = \text{Var}(X) +
+	[E(X)]^2$ para cualquier variable
+	aleatoria:
+	\[
+	E(X_i^2) = \sigma^2 + \mu^2,
+	\qquad
+	E(\bar{X}^2) = \text{Var}(\bar{X})
+	+ [E(\bar{X})]^2
+	= \frac{\sigma^2}{n} + \mu^2.
+	\]
+	Sustituyendo:
+	\[
+	E\!\left[\sum_{i=1}^{n}
+	(X_i - \bar{X})^2\right]
+	= n(\sigma^2 + \mu^2)
+	- n\!\left(\frac{\sigma^2}{n}
+	+ \mu^2\right)
+	= n\sigma^2 + n\mu^2
+	- \sigma^2 - n\mu^2
+	= (n-1)\sigma^2.
+	\]
+	Por lo tanto:
+	\[
+	E(S^2) = \frac{1}{n-1}\,
+	E\!\left[\sum_{i=1}^{n}
+	(X_i - \bar{X})^2\right]
+	= \frac{(n-1)\sigma^2}{n-1}
+	= \sigma^2. \qedhere
+	\]
+\end{proof}
+
+\begin{observacion}
+	La demostraci\'{o}n revela por qu\'{e}
+	el denominador es $n-1$ y no $n$: es
+	exactamente el factor necesario para
+	cancelar el $(n-1)$ que aparece al
+	calcular $E\!\left[\sum(X_i -
+	\bar{X})^2\right]$. Si se dividiera
+	por $n$, el estimador ser\'{i}a
+	$\frac{n-1}{n}\sigma^2 < \sigma^2$
+	--- sistem\'{a}ticamente sesgado
+	hacia abajo. La raz\'{o}n intuitiva
+	es que $\bar{X}$ ya usa los datos
+	para aproximar $\mu$, consumiendo
+	un grado de libertad --- de ah\'{i}
+	el $n-1$.
+\end{observacion}
+
+% ----------------------------------------------------------
+\subsection{La distribuci\'{o}n $t$-Student}
+
+Ahora que tenemos $S^2$ bien definido, podemos
+construir el estad\'{i}stico an\'{a}logo a $Z_0$
+pero con $S$ en lugar de $\sigma$. La pregunta
+inmediata es: ¿qu\'{e} distribuci\'{o}n sigue
+ese estad\'{i}stico bajo $H_0$?
+
+Ya no puede ser $N(0,1)$, porque $S$ es una
+variable aleatoria --- introduce variabilidad
+adicional respecto a $Z_0$. Esa variabilidad
+extra produce una distribuci\'{o}n con
+\textbf{colas m\'{a}s pesadas} que la normal:
+asigna m\'{a}s probabilidad a valores extremos.
+
+La consecuencia pr\'{a}ctica es concreta: los
+valores cr\'{i}ticos de esa distribuci\'{o}n
+son m\'{a}s grandes que los de la $N(0,1)$
+para el mismo $\alpha$. Por ejemplo, para
+$\alpha = 0{,}05$ en una prueba de dos colas:
+\begin{center}
+	\begin{tabular}{lc}
+		\toprule
+		\textbf{Distribuci\'{o}n} &
+		\textbf{Valor cr\'{i}tico} \\
+		\midrule
+		$N(0,1)$            & $1{,}960$ \\
+		$t$ con 30 g.l.     & $2{,}042$ \\
+		$t$ con 10 g.l.     & $2{,}228$ \\
+		$t$ con 5 g.l.      & $2{,}571$ \\
+		\bottomrule
+	\end{tabular}
+\end{center}
+Es decir, con muestras peque\~{n}as se necesita
+evidencia m\'{a}s extrema para rechazar $H_0$
+--- lo que tiene sentido, porque la estimaci\'{o}n
+de $\sigma^2$ es menos confiable. A medida que
+$n \to \infty$, $S \to \sigma$ y la distribuci\'{o}n
+converge a $N(0,1)$.
+
+Esa distribuci\'{o}n es la \textbf{$t$-Student},
+descubierta por William Sealy Gosset en 1908,
+quien la public\'{o} bajo el seud\'{o}nimo
+``Student'' porque su empleador --- la cervecer\'{i}a
+Guinness --- no permit\'{i}a publicaciones a
+sus empleados.
+
+\begin{definicion}{Distribuci\'{o}n
+		$t$-Student}{t-student}
+	Se dice que una variable aleatoria $T$
+	sigue una \textbf{distribuci\'{o}n
+		$t$-Student con $\nu$ grados de libertad},
+	y se escribe $T \sim t_{\nu}$, si su
+	funci\'{o}n de densidad es:
+	\[
+	f(t) = \frac{\Gamma\!\left(
+		\frac{\nu+1}{2}\right)}
+	{\sqrt{\nu\pi}\;
+		\Gamma\!\left(\frac{\nu}{2}\right)}
+	\left(1 + \frac{t^2}{\nu}
+	\right)^{-(\nu+1)/2},
+	\qquad t \in \mathbb{R},
+	\]
+	donde $\Gamma$ es la funci\'{o}n Gamma.
+	La distribuci\'{o}n $t_\nu$ es sim\'{e}trica
+	respecto a cero, tiene colas m\'{a}s pesadas
+	que la $N(0,1)$, y converge a $N(0,1)$
+	cuando $\nu \to \infty$.
+\end{definicion}
+
+\begin{observacion}
+	La notaci\'{o}n $t_{n-1,\,\alpha}$ denota
+	el valor tal que
+	\[
+	P(T > t_{n-1,\,\alpha}) = \alpha,
+	\qquad T \sim t_{n-1}.
+	\]
+	Es decir, $t_{n-1,\,\alpha}$ es el percentil
+	$1-\alpha$ de la distribuci\'{o}n $t$ con
+	$n-1$ grados de libertad. Por simetr\'{i}a,
+	$-t_{n-1,\,\alpha}$ es el percentil $\alpha$.
+\end{observacion}
+
+\begin{figure}[H]
+	\centering
+	\begin{tikzpicture}
+		\begin{axis}[
+			width = 10cm, height = 6cm,
+			domain = -4:4,
+			samples = 200,
+			axis lines = left,
+			xlabel = {$t$},
+			ylabel = {},
+			ytick = \empty,
+			ymin = 0, ymax = 0.45,
+			axis line style = {draw = gray!60},
+			tick style = {draw = gray!60},
+			legend pos = north east,
+			legend style = {font = \small},
+			every axis x label/.style = {
+				at = {(axis cs: 4, 0)},
+				anchor = west, font = \small
+			}
+			]
+			% N(0,1)
+			\addplot[thick, NavyBlue, smooth]
+			{exp(-x^2/2) / sqrt(2*pi)};
+			\addlegendentry{$N(0,1)$}
+			
+% t con 10 g.l.
+\addplot[thick, rojo, smooth, dashed]
+{0.3891 * (1 + x^2/10)^(-5.5)};
+\addlegendentry{$t_{10}$}
+
+% t con 3 g.l.
+\addplot[thick, verde!70!black, smooth,
+dotted]
+{0.3676 * (1 + x^2/3)^(-2)};
+\addlegendentry{$t_{3}$}
+			
+		\end{axis}
+	\end{tikzpicture}
+	\caption{Comparaci\'{o}n entre la $N(0,1)$ y
+		la distribuci\'{o}n $t$-Student con distinto
+		n\'{u}mero de grados de libertad. A menor
+		$\nu$, las colas son m\'{a}s pesadas y el
+		pico central m\'{a}s bajo.}
+	\label{fig:t-student}
+\end{figure}
+
+% ----------------------------------------------------------
+\subsection{El estad\'{i}stico $T_0$ y las
+	regiones de rechazo}
+
+Con la distribuci\'{o}n $t$-Student establecida,
+podemos construir el estad\'{i}stico de prueba
+para el caso de varianza desconocida. La idea
+es la misma que en la prueba $Z$: estandarizar
+$\bar{X}$ bajo $H_0$, pero ahora usando $S$
+en lugar de $\sigma$.
+
+\begin{definicion}{Estad\'{i}stico $T_0$}
+	{estadistico-t0}
+	Sea $X_1, X_2, \ldots, X_n$ una muestra
+	aleatoria de una poblaci\'{o}n
+	$N(\mu, \sigma^2)$ con $\sigma^2$
+	desconocida. Bajo $H_0: \mu = \mu_0$,
+	el \textbf{estad\'{i}stico de prueba}
+	es:
+	\[
+	T_0 = \frac{\bar{X} - \mu_0}
+	{S / \sqrt{n}}.
+	\]
+\end{definicion}
+
+\begin{proposicion}{Distribuci\'{o}n de $T_0$
+		bajo $H_0$}{dist-t0}
+	Bajo $H_0: \mu = \mu_0$, el
+	estad\'{i}stico $T_0$ sigue una
+	distribuci\'{o}n $t$-Student con
+	$n-1$ grados de libertad:
+	\[
+	T_0 \sim t_{n-1}.
+	\]
+\end{proposicion}
+
+\begin{proof}
+	Reescribimos $T_0$ multiplicando y
+	dividiendo por $\sigma$:
+	\[
+	T_0 = \frac{\bar{X} - \mu_0}
+	{S/\sqrt{n}}
+	= \frac{(\bar{X} - \mu_0)/
+		(\sigma/\sqrt{n})}
+	{S/\sigma}
+	= \frac{Z_0}{S/\sigma},
+	\]
+	donde $Z_0 = \frac{\bar{X} - \mu_0}
+	{\sigma/\sqrt{n}} \sim N(0,1)$ bajo
+	$H_0$ por la
+	Proposici\'{o}n~\ref{prop:dist-z0}.
+	
+	\medskip
+	Reescribimos el denominador en
+	t\'{e}rminos de la varianza muestral:
+	\[
+	\frac{S}{\sigma}
+	= \sqrt{\frac{S^2}{\sigma^2}}
+	= \sqrt{\frac{(n-1)S^2/\sigma^2}
+		{n-1}}.
+	\]
+	
+	\begin{observacion}
+		Se puede demostrar que, cuando
+		la poblaci\'{o}n es normal,
+		\[
+		\frac{(n-1)S^2}{\sigma^2}
+		\sim \chi^2_{n-1},
+		\]
+		donde $\chi^2_{n-1}$ denota la
+		\textbf{distribuci\'{o}n
+			chi-cuadrado con $n-1$ grados
+			de libertad} --- una distribuci\'{o}n
+		continua de soporte positivo que
+		surge naturalmente al sumar
+		cuadrados de variables normales
+		est\'{a}ndar independientes. El
+		desarrollo formal de la
+		distribuci\'{o}n $\chi^2$ est\'{a}
+		fuera del alcance de este curso.
+	\end{observacion}
+	
+	Por lo tanto:
+	\[
+	\frac{S}{\sigma}
+	= \sqrt{\frac{\chi^2_{n-1}}{n-1}}.
+	\]
+	Sustituyendo en $T_0$:
+	\[
+	T_0 = \frac{Z_0}{\sqrt{\chi^2_{n-1}
+			/(n-1)}}.
+	\]
+	
+	\begin{observacion}
+		Se puede demostrar adem\'{a}s que,
+		cuando la poblaci\'{o}n es normal,
+		$\bar{X}$ y $S^2$ son
+		\textbf{independientes} --- resultado
+		no trivial cuya demostraci\'{o}n
+		tambi\'{e}n est\'{a} fuera del
+		alcance del curso.
+	\end{observacion}
+	
+	Con la independencia de $Z_0$ y
+	$\chi^2_{n-1}$ garantizada, el cociente
+	anterior es exactamente la
+	\textbf{definici\'{o}n} de una variable
+	$t$-Student: si $Z \sim N(0,1)$ y
+	$V \sim \chi^2_\nu$ son independientes,
+	entonces
+	\[
+	T = \frac{Z}{\sqrt{V/\nu}}
+	\sim t_\nu.
+	\]
+	Aplicando con $\nu = n-1$:
+	\[
+	T_0 = \frac{Z_0}{\sqrt{\chi^2_{n-1}
+			/(n-1)}} \sim t_{n-1}. \qedhere
+	\]
+\end{proof}
+
+Con $T_0 \sim t_{n-1}$ bajo $H_0$, las
+regiones de rechazo se construyen de forma
+an\'{a}loga a la prueba $Z$, reemplazando
+los percentiles de la $N(0,1)$ por los
+de la $t_{n-1}$.
+
+\begin{table}[H]
+	\centering
+	\begin{tabular}{lll}
+		\toprule
+		\textbf{Hip\'{o}tesis alternativa
+			$H_1$} &
+		\textbf{Regi\'{o}n cr\'{i}tica} &
+		\textbf{Tipo de prueba} \\
+		\midrule
+		$\mu > \mu_0$ &
+		$T_0 > t_{n-1,\,\alpha}$ &
+		Cola superior \\[4pt]
+		$\mu < \mu_0$ &
+		$T_0 < -t_{n-1,\,\alpha}$ &
+		Cola inferior \\[4pt]
+		$\mu \neq \mu_0$ &
+		$|T_0| > t_{n-1,\,\alpha/2}$ &
+		Dos colas \\
+		\bottomrule
+	\end{tabular}
+	\caption{Regiones de rechazo para la
+		prueba $t$ seg\'{u}n la hip\'{o}tesis
+		alternativa.}
+	\label{tab:regiones-t}
+\end{table}
+
+\begin{ejemplo}{Prueba $t$ para la media:
+		latas de pi\~{n}a}{latas}
+	
+	Una persona sospecha que las latas de pi\~{n}a
+	de 16 onzas se est\'{a}n llenando en exceso.
+	El departamento de control de calidad toma una
+	muestra aleatoria de $n = 15$ latas, obteniendo
+	una media muestral de $\bar{x} = 16{,}3$ onzas
+	y una desviaci\'{o}n est\'{a}ndar muestral de
+	$s = 0{,}6$ onzas. Los pesos se distribuyen
+	normalmente y $\sigma^2$ es desconocida.
+	
+	N\'{o}tese que la sospecha tiene una
+	\textbf{direcci\'{o}n prefijada} --- se cree
+	que las latas se est\'{a}n llenando \emph{en
+		exceso}, no simplemente que el peso es distinto
+	de 16. Eso determina directamente la forma de
+	$H_1$.
+	
+	\medskip
+	\textbf{Paso 1. Hip\'{o}tesis.}
+	
+	La sospecha es que el llenado es excesivo,
+	es decir, que $\mu > 16$. Por lo tanto la
+	prueba es de cola superior:
+	\[
+	H_0: \mu = 16 \qquad \text{vs} \qquad
+	H_1: \mu > 16.
+	\]
+	
+	\medskip
+	\textbf{Paso 2. Nivel de significancia.}
+	
+	El problema no especifica $\alpha$, por lo
+	que adoptamos el valor convencional
+	$\alpha = 0{,}05$.
+	
+	\medskip
+	\textbf{Paso 3. Estad\'{i}stico de prueba.}
+	
+	La poblaci\'{o}n es normal y $\sigma^2$ es
+	desconocida, por lo que corresponde usar la
+	prueba $t$. El estad\'{i}stico es:
+	\[
+	T_0 = \frac{\bar{X} - \mu_0}
+	{S/\sqrt{n}}
+	= \frac{\bar{X} - 16}
+	{0{,}6/\sqrt{15}}.
+	\]
+	
+	\medskip
+	\textbf{Paso 4. Regi\'{o}n cr\'{i}tica.}
+	
+	Como la prueba es de cola superior, el valor
+	cr\'{i}tico es $t_{n-1,\,\alpha} =
+	t_{14,\,0{,}05}$. Este es el \'{u}nico umbral
+	que garantiza que $P(T_0 > c \mid H_0) =
+	0{,}05$ cuando $T_0 \sim t_{14}$:
+	\[
+	P(T_0 > c \mid H_0) = 0{,}05
+	\implies c = t_{14,\,0{,}05} = 1{,}761.
+	\]
+	Se rechaza $H_0$ si $T_0 > 1{,}761$.
+	
+	\medskip
+	\textbf{Paso 5. Muestra y decisi\'{o}n.}
+	
+	Con los datos observados $\bar{x} = 16{,}3$,
+	$s = 0{,}6$, $n = 15$:
+	\[
+	t_0 = \frac{16{,}3 - 16}
+	{0{,}6/\sqrt{15}}
+	= \frac{0{,}3}{0{,}1549}
+	= 1{,}936.
+	\]
+	Como $t_0 = 1{,}936 > 1{,}761$, el valor
+	observado cae dentro de la regi\'{o}n
+	cr\'{i}tica.
+	
+	\medskip
+	\textbf{Conclusi\'{o}n.} Se rechaza $H_0$
+	con nivel de significancia $\alpha = 0{,}05$.
+	Los datos proporcionan evidencia suficiente
+	para concluir que las latas se est\'{a}n
+	llenando en exceso --- la discrepancia
+	observada es demasiado grande para ser
+	atribuida al azar del muestreo.
+	
+\end{ejemplo}
+
+% ==========================================================
+\section{Estimaci\'{o}n por intervalos de
+	confianza}
+
+El test de hip\'{o}tesis responde una pregunta
+binaria: ¿es $\mu = \mu_0$ o no? Pero esa
+pregunta asume que ya tenemos un valor $\mu_0$
+espec\'{i}fico para testear. En muchos casos
+pr\'{a}cticos no tenemos ese valor --- simplemente
+queremos saber \textbf{en qu\'{e} rango} est\'{a}
+$\mu$.
+
+La \textbf{estimaci\'{o}n por intervalos de
+	confianza} responde esa pregunta. En lugar de
+decir ``$\mu$ vale exactamente $\hat{\mu}$''
+--- lo cual es casi con certeza falso ---
+construimos un intervalo $[l, u]$ que contiene
+a $\mu$ con una probabilidad prefijada
+$1 - \alpha$. Esa probabilidad se denomina
+\textbf{coeficiente de confianza}.
+
+La idea clave es que el intervalo es aleatorio
+--- depende de los datos --- pero el par\'{a}metro
+$\mu$ es fijo. Lo que tiene probabilidad
+$1 - \alpha$ no es que ``$\mu$ est\'{e} en el
+intervalo'', sino que ``el procedimiento de
+construcci\'{o}n produzca un intervalo que
+contenga a $\mu$''.
+
+% ----------------------------------------------------------
+\subsection{Intervalo de confianza con varianza
+	conocida}
+
+Cuando $\sigma^2$ es conocida, sabemos que
+$\bar{X} \sim N(\mu, \sigma^2/n)$, luego el
+estad\'{i}stico
+\[
+Z = \frac{\bar{X} - \mu}{\sigma/\sqrt{n}}
+\sim N(0,1).
+\]
+Este estad\'{i}stico se denomina
+\textbf{pivote}: es una funci\'{o}n de los
+datos y del par\'{a}metro $\mu$ cuya
+distribuci\'{o}n es completamente conocida
+e independiente de $\mu$. Eso nos permite
+construir el intervalo imponiendo una
+condici\'{o}n de probabilidad:
+\[
+P\!\left(-z_{1-\alpha/2} \leq
+\frac{\bar{X} - \mu}{\sigma/\sqrt{n}}
+\leq z_{1-\alpha/2}\right) = 1 - \alpha.
+\]
+Despejando $\mu$:
+\[
+P\!\left(\bar{X} - z_{1-\alpha/2}
+\frac{\sigma}{\sqrt{n}} \leq \mu \leq
+\bar{X} + z_{1-\alpha/2}
+\frac{\sigma}{\sqrt{n}}\right)
+= 1 - \alpha.
+\]
+
+\begin{definicion}{Intervalo de confianza
+		para $\mu$ con varianza conocida}
+	{ic-varianza-conocida}
+	Sea $\bar{x}$ la media de una muestra
+	aleatoria de tama\~{n}o $n$ de una
+	poblaci\'{o}n $N(\mu, \sigma^2)$ con
+	$\sigma^2$ conocida. Un intervalo de
+	confianza del $100(1-\alpha)\%$ para
+	$\mu$ es:
+	\[
+	\bar{x} - z_{1-\alpha/2}
+	\frac{\sigma}{\sqrt{n}}
+	\leq \mu \leq
+	\bar{x} + z_{1-\alpha/2}
+	\frac{\sigma}{\sqrt{n}}.
+	\]
+	Se define:
+	\begin{itemize}[leftmargin=2em]
+		\item $l = \bar{x} - z_{1-\alpha/2}
+		\dfrac{\sigma}{\sqrt{n}}$:
+		\textbf{l\'{i}mite inferior} de
+		confianza.
+		\item $u = \bar{x} + z_{1-\alpha/2}
+		\dfrac{\sigma}{\sqrt{n}}$:
+		\textbf{l\'{i}mite superior} de
+		confianza.
+		\item $u - l = 2z_{1-\alpha/2}
+		\dfrac{\sigma}{\sqrt{n}}$:
+		\textbf{longitud} del intervalo.
+		\item $E = z_{1-\alpha/2}
+		\dfrac{\sigma}{\sqrt{n}}$:
+		\textbf{error de estimaci\'{o}n}
+		o precisi\'{o}n del estimador.
+	\end{itemize}
+\end{definicion}
+
+\begin{observacion}
+	Existe una tensi\'{o}n entre confianza
+	e informatividad: a mayor $1-\alpha$,
+	el intervalo es m\'{a}s ancho y por
+	lo tanto menos informativo sobre
+	d\'{o}nde est\'{a} $\mu$. Un intervalo
+	del $99\%$ de confianza siempre
+	ser\'{a} m\'{a}s ancho que uno del
+	$95\%$ con los mismos datos. La
+	\'{u}nica forma de aumentar la
+	confianza sin sacrificar informatividad
+	es aumentar $n$.
+\end{observacion}
+
+\begin{ejemplo}{Intervalo de confianza para
+		el gasto en sitios web}{negocios-web}
+	
+	En una investigaci\'{o}n sobre negocios
+	peque\~{n}os con sitio web se encontr\'{o}
+	que el gasto medio anual es de
+	\$11.500. Se dispone de una muestra de
+	$n = 60$ negocios con desviaci\'{o}n
+	est\'{a}ndar conocida $\sigma = \$4.000$.
+	Construya un intervalo de confianza del
+	$95\%$ para la media del gasto anual.
+	
+	\medskip
+	Con $\alpha = 0{,}05$ el valor cr\'{i}tico
+	es $z_{0{,}975} = 1{,}960$. El error de
+	estimaci\'{o}n es:
+	\[
+	E = 1{,}960 \cdot
+	\frac{4.000}{\sqrt{60}}
+	= 1{,}960 \cdot 516{,}4
+	= 1.012{,}1.
+	\]
+	El intervalo de confianza del $95\%$ es:
+	\[
+	11.500 - 1.012{,}1
+	\leq \mu \leq
+	11.500 + 1.012{,}1,
+	\]
+	\[
+	10.487{,}9 \leq \mu \leq 12.512{,}1.
+	\]
+	Con un $95\%$ de confianza, el gasto medio
+	anual de los negocios peque\~{n}os con
+	sitio web se encuentra entre \$10.487{,}9
+	y \$12.512{,}1.
+	
+\end{ejemplo}
+
+% ----------------------------------------------------------
+\subsection{Tama\~{n}o muestral \'{o}ptimo}
+
+En la pr\'{a}ctica, el investigador suele
+fijar de antemano el error de estimaci\'{o}n
+m\'{a}ximo tolerable $E$ y el coeficiente
+de confianza $1-\alpha$, y desea saber
+cu\'{a}ntas observaciones necesita. Despejando
+$n$ de la expresi\'{o}n del error:
+\[
+E = z_{1-\alpha/2}
+\frac{\sigma}{\sqrt{n}}
+\implies \sqrt{n} =
+z_{1-\alpha/2} \frac{\sigma}{E}
+\implies n =
+\left(\frac{z_{1-\alpha/2}\,
+	\sigma}{E}\right)^2.
+\]
+
+\begin{definicion}{Tama\~{n}o muestral
+		\'{o}ptimo}{tamano-muestral}
+	Para estimar $\mu$ con un error de
+	estimaci\'{o}n m\'{a}ximo $E$ y un
+	coeficiente de confianza $1-\alpha$,
+	el tama\~{n}o muestral requerido es:
+	\[
+	n = \left(\frac{z_{1-\alpha/2}\,
+		\sigma}{E}\right)^2.
+	\]
+	Si $n$ no es entero, se redondea
+	\textbf{hacia arriba} para garantizar
+	que el error no supere $E$.
+\end{definicion}
+
+\begin{ejemplo}{Tama\~{n}o muestral para
+		estimar salarios}{consejos}
+	
+	Un estudiante desea estimar el salario
+	medio mensual de los miembros de consejos
+	ciudadanos de grandes ciudades, con un
+	error inferior a $100$ u.m.\ y un nivel
+	de confianza del $95\%$. Un informe del
+	Departamento del Trabajo reporta
+	$\sigma = 1.000$ u.m. ¿Cu\'{a}ntas
+	observaciones se necesitan?
+	
+	\medskip
+	Con $\alpha = 0{,}05$, $z_{0{,}975} =
+	1{,}960$, $E = 100$ y $\sigma = 1.000$:
+	\[
+	n = \left(\frac{1{,}960 \times 1.000}
+	{100}\right)^2
+	= (19{,}6)^2
+	= 384{,}16.
+	\]
+	Redondeando hacia arriba: $n = 385$.
+	Se requieren al menos $385$ observaciones
+	para garantizar un error inferior a
+	$100$ u.m.\ con un $95\%$ de confianza.
+	
+\end{ejemplo}
+
+% ----------------------------------------------------------
+\subsection{Intervalo de confianza con
+	varianza desconocida}
+
+Cuando $\sigma^2$ es desconocida, la
+reemplazamos por $S$ --- exactamente como
+en la prueba $t$. El pivote ya no es
+$Z \sim N(0,1)$ sino:
+\[
+T = \frac{\bar{X} - \mu}{S/\sqrt{n}}
+\sim t_{n-1},
+\]
+por la Proposici\'{o}n~\ref{prop:dist-t0}.
+Imponiendo la condici\'{o}n de probabilidad:
+\[
+P\!\left(-t_{n-1,\,\alpha/2} \leq
+\frac{\bar{X} - \mu}{S/\sqrt{n}}
+\leq t_{n-1,\,\alpha/2}\right)
+= 1 - \alpha,
+\]
+y despejando $\mu$:
+\[
+P\!\left(\bar{X} - t_{n-1,\,\alpha/2}
+\frac{S}{\sqrt{n}} \leq \mu \leq
+\bar{X} + t_{n-1,\,\alpha/2}
+\frac{S}{\sqrt{n}}\right)
+= 1 - \alpha.
+\]
+
+\begin{definicion}{Intervalo de confianza
+		para $\mu$ con varianza desconocida}
+	{ic-varianza-desconocida}
+	Sea $\bar{x}$ y $s$ la media y
+	desviaci\'{o}n est\'{a}ndar muestral
+	de una muestra aleatoria de tama\~{n}o
+	$n$ de una poblaci\'{o}n normal con
+	$\sigma^2$ desconocida. Un intervalo
+	de confianza del $100(1-\alpha)\%$
+	para $\mu$ es:
+	\[
+	\bar{x} - t_{n-1,\,\alpha/2}
+	\frac{s}{\sqrt{n}}
+	\leq \mu \leq
+	\bar{x} + t_{n-1,\,\alpha/2}
+	\frac{s}{\sqrt{n}}.
+	\]
+\end{definicion}
+
+\begin{ejemplo}{Intervalo de confianza para
+		tweets diarios}{tweets}
+	
+	El n\'{u}mero de tweets diarios de j\'{o}venes
+	entre 16 y 24 a\~{n}os sigue una distribuci\'{o}n
+	normal con media y varianza desconocidas.
+	Se toma una muestra de $n = 21$ usuarios,
+	obteniendo $\bar{x} = 12$ tweets y
+	$s = 6$ tweets. Construya un intervalo
+	de confianza del $90\%$ para la media
+	poblacional.
+	
+	\medskip
+	Con $\alpha = 0{,}10$, los grados de
+	libertad son $n - 1 = 20$, y el valor
+	cr\'{i}tico es $t_{20,\,0{,}05} = 1{,}725$.
+	El error de estimaci\'{o}n es:
+	\[
+	E = 1{,}725 \cdot
+	\frac{6}{\sqrt{21}}
+	= 1{,}725 \cdot 1{,}309
+	= 2{,}258.
+	\]
+	El intervalo de confianza del $90\%$ es:
+	\[
+	12 - 2{,}258
+	\leq \mu \leq
+	12 + 2{,}258,
+	\]
+	\[
+	9{,}742 \leq \mu \leq 14{,}258.
+	\]
+	Con un $90\%$ de confianza, el n\'{u}mero
+	medio de tweets diarios se encuentra entre
+	$9{,}742$ y $14{,}258$.
+	
+\end{ejemplo}
 
 \end{document}
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       
