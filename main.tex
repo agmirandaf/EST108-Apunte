@@ -82,7 +82,7 @@
 % ==========================================================
 
 \newtcbtheorem[number within=chapter]{definicion}{Definici\'{o}n}{
-    enhanced, breakable,
+    enhanced, unbreakable,
     colback=azulclaro, colframe=azul,
     fonttitle=\bfseries\color{white}, coltitle=white,
     attach boxed title to top left={yshift=-2mm, xshift=6mm},
@@ -91,7 +91,7 @@
 }{def}
 
 \newtcbtheorem[number within=chapter]{axioma}{Axioma}{
-    enhanced, breakable,
+    enhanced, unbreakable,
     colback=rojoclaro, colframe=rojo,
     fonttitle=\bfseries\color{white}, coltitle=white,
     attach boxed title to top left={yshift=-2mm, xshift=6mm},
@@ -100,7 +100,7 @@
 }{ax}
 
 \newtcbtheorem[number within=chapter]{teorema}{Teorema}{
-    enhanced, breakable,
+    enhanced, unbreakable,
     colback=gris, colframe=azul!70!black,
     fonttitle=\bfseries\color{white}, coltitle=white,
     attach boxed title to top left={yshift=-2mm, xshift=6mm},
@@ -109,7 +109,7 @@
 }{teo}
 
 \newtcbtheorem[number within=chapter]{proposicion}{Proposici\'{o}n}{
-    enhanced, breakable,
+    enhanced, unbreakable,
     colback=verdeclaro, colframe=verde,
     fonttitle=\bfseries\color{white}, coltitle=white,
     attach boxed title to top left={yshift=-2mm, xshift=6mm},
@@ -118,7 +118,7 @@
 }{prop}
 
 \newtcbtheorem[number within=chapter]{corolario}{Corolario}{
-	enhanced, breakable,
+	enhanced, unbreakable,
 	colback=green!10, colframe=green!50!black,
 	fonttitle=\bfseries\color{white}, coltitle=white,
 	attach boxed title to top left={yshift=-2mm, xshift=6mm},
@@ -6305,6 +6305,54 @@ Se rechaza $H_0$ si $|Z_0| > z_{1-\alpha/2}$.
 	z_{0{,}975} = 1{,}960, \qquad
 	z_{0{,}99} = 2{,}326.
 	\]
+\end{observacion}
+
+% ----------------------------------------------------------
+\subsection{Uso de la tabla normal est\'{a}ndar}
+
+La funci\'{o}n $\Phi(z) = P(Z \leq z)$ no tiene
+f\'{o}rmula cerrada --- su valor se obtiene
+num\'{e}ricamente, en la pr\'{a}ctica mediante
+tablas estad\'{i}sticas o software. La tabla
+de la distribuci\'{o}n normal est\'{a}ndar
+organiza los valores de $\Phi(z)$ para distintos
+valores de $z$: las filas corresponden a la parte
+entera y primer decimal de $z$, y las columnas
+al segundo decimal.
+
+La tabla se usa en dos direcciones:
+
+\medskip
+\textbf{Direcci\'{o}n directa.} Dado el valor
+observado $z_0$, obtener $\Phi(z_0)$. Se busca
+la fila correspondiente a la parte entera y
+primer decimal de $z_0$, y la columna del segundo
+decimal. Por ejemplo, para $z_0 = 1{,}96$: fila
+$1{,}9$, columna $0{,}06$, valor
+$\Phi(1{,}96) = 0{,}9750$. Esto se usa para
+calcular el valor $p$ --- por ejemplo, para cola
+superior: $p = 1 - \Phi(z_0) = 1 - 0{,}9750
+= 0{,}0250$.
+
+\medskip
+\textbf{Direcci\'{o}n inversa.} Dada una
+probabilidad $1 - \alpha$, obtener el percentil
+$z_{1-\alpha}$. Se busca el valor $1 - \alpha$
+dentro de la tabla y se lee el $z$ correspondiente.
+Por ejemplo, para $\alpha = 0{,}05$ en cola
+superior: se busca $0{,}9500$ en la tabla y se
+lee $z_{0{,}95} = 1{,}645$. Esto se usa para
+obtener los valores cr\'{i}ticos.
+
+\begin{observacion}
+	Por simetr\'{i}a de la $N(0,1)$, si
+	necesitas $\Phi(-z)$ y la tabla solo
+	cubre valores positivos de $z$, usa:
+	\[
+	\Phi(-z) = 1 - \Phi(z).
+	\]
+	Por ejemplo, $\Phi(-1{,}96) = 1 -
+	\Phi(1{,}96) = 1 - 0{,}9750 = 0{,}0250$.
 \end{observacion}
 
 \begin{ejemplo}{Prueba $Z$ para la media: cl\'{i}nica
